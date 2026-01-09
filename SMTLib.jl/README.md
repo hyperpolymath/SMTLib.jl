@@ -111,6 +111,25 @@ find_solver()              # Get first available solver
 find_solver(:z3)           # Get specific solver
 ```
 
+### User Options
+
+```julia
+# Select a solver explicitly
+solver = find_solver(:cvc5)
+ctx = SMTContext(solver=solver, logic=:QF_LIA, timeout_ms=15000)
+
+# Skip model parsing when you only need satisfiable/unsatisfiable
+result = check_sat(ctx; get_model=false)
+```
+
+```julia
+# Macro options (same knobs as SMTContext)
+result = @smt solver=:z3 logic=:QF_LRA timeout=10000 begin
+    x::Float64
+    x > 0.0
+end
+```
+
 ### Context Management
 
 ```julia

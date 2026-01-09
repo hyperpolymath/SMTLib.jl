@@ -13,6 +13,12 @@
 
 This package is pure Julia, so there is no separate build step beyond precompilation.
 
+## User Options & Configuration
+- Prefer `find_solver(:z3)` or `find_solver(:cvc5)` when you need a specific backend.
+- `SMTContext` accepts `solver`, `logic`, and `timeout_ms` (milliseconds).
+- `check_sat(ctx; get_model=false)` skips model parsing when you only need status.
+- The `@smt` macro mirrors `SMTContext` options: `@smt solver=:z3 logic=:QF_LRA timeout=10000 begin ... end`.
+
 ## Coding Style & Naming Conventions
 - Follow Julia conventions: 4-space indentation, CamelCase for types (`SMTContext`), lowercase with underscores for functions (`available_solvers`), and `!` suffix for mutating functions (`reset!`, `assert!`).
 - Keep public API exported from `src/SMTLib.jl` and add docstrings for new public functions.
@@ -26,6 +32,7 @@ This package is pure Julia, so there is no separate build step beyond precompila
 ## CI & Solver Detection
 - CI should install at least one solver and ensure it is on `PATH` (e.g., `apt-get install z3` on Ubuntu runners).
 - Expect solver-backed tests to skip or return `:unknown` if no solver is detected; document this in CI logs or PR notes.
+- For a solver matrix, run separate CI jobs with only one solver on `PATH` to validate backend-specific behavior.
 - If adding a new solver, extend `available_solvers()` and keep `README.md` and this guide in sync.
 
 ## Commit & Pull Request Guidelines
