@@ -363,8 +363,6 @@ end
 Get SMT-LIB type string for Julia type.
 """
 smt_type(::Type{Int}) = "Int"
-smt_type(::Type{Int64}) = "Int"
-smt_type(::Type{Int32}) = "Int"
 smt_type(::Type{Bool}) = "Bool"
 smt_type(::Type{Float64}) = "Real"
 smt_type(::Type{Float32}) = "Real"
@@ -474,17 +472,7 @@ function run_solver(solver::SMTSolver, script::String, timeout_ms::Int)
         cmd = build_solver_command(solver, temp_file, timeout_ms)
 
         # Run solver
-        output = try
-            read(cmd, String)
-        catch e
-            if e isa ProcessFailedException
-                # Some solvers return non-zero on unsat
-                String(e.procs[1].cmd.exec[end])
-            else
-                return SMTResult(:error, Dict{Symbol, Any}(), Symbol[],
-                               Dict{String, Any}(), "Error: $e")
-            end
-        end
+        output = read(ignorestatus(cmd), String)
 
         # Parse result
         parse_result(output)
@@ -572,8 +560,8 @@ end
 
 Parse an SMT-LIB value.
 """
-function parse_smt_value(s::String)
-    s = strip(s)
+function parse_smt_value(s::AbstractString)
+    s = strip(String(s))
 
     # Boolean
     if s == "true"
@@ -738,8 +726,11 @@ function _extract_vars!(vars::Dict, expr)
 end
 
 function is_operator(s::Symbol)
-    s in [:+, :-, :*, :/, :div, :mod, :==, :!=, :<, :>, :<=, :>=,
-          :!, :&&, :||, :true, :false, :∧, :∨, :¬, :⟹, :⟺]
+    s in [Symbol("+"), Symbol("-"), Symbol("*"), Symbol("/"), :div, :mod,
+          Symbol("=="), Symbol("!="), Symbol("<"), Symbol(">"),
+          Symbol("<="), Symbol(">="), Symbol("!"), Symbol("&&"), Symbol("||"),
+          :true, :false, Symbol("∧"), Symbol("∨"), Symbol("¬"),
+          Symbol("⟹"), Symbol("⟺")]
 end
 
 end # module

@@ -1,0 +1,10 @@
+# This file is machine-generated - editing it directly is not advised
+
+julia_version = "1.12.2"
+manifest_format = "2.0"
+project_hash = "fee8a6546d79400897c0938c20ce1f8922068521"
+
+[[deps.SMTLib]]
+path = "."
+uuid = "7d3f9a2c-8b4e-5c1f-a6d0-9e8f7b2c3d4e"
+version = "0.1.0"
