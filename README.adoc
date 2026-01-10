@@ -1,0 +1,96 @@
+image:https://img.shields.io/badge/license-PMPL--1.0-blue.svg[License,link="https://github.com/hyperpolymath/palimpsest-license"]
+// SPDX-License-Identifier: PMPL-1.0
+= SMTLib.jl
+
+:toc: macro
+:toclevels: 2
+:icons: font
+:source-highlighter: rouge
+
+[.lead]
+*A lightweight Julia interface to SMT solvers via SMT-LIB2, designed for verification, synthesis, and symbolic automation.*
+
+toc::[]
+
+== What is SMTLib.jl?
+
+SMTLib.jl is a Julia package that generates and consumes SMT-LIB2, the standard
+language for communicating with SMT solvers such as Z3, CVC5, Yices, and MathSAT.
+It gives you a clean Julia API for building constraints, checking satisfiability,
+and parsing models.
+
+== Features
+
+* **Solver auto-detection** — discover installed solvers on PATH
+* **SMT-LIB2 generation** — emit solver-ready programs from Julia expressions
+* **Model parsing** — pull structured model values back into Julia
+* **Incremental solving** — push/pop contexts for interactive workflows
+* **Timeouts** — control solver budgets deterministically
+* **Zero dependencies** — pure Julia
+
+== Quick Start
+
+[source,julia]
+----
+using SMTLib
+
+ctx = SMTContext(logic=:QF_LIA)
+
+declare(ctx, :x, Int)
+declare(ctx, :y, Int)
+
+assert!(ctx, :(x + y == 10))
+assert!(ctx, :(x > 0))
+assert!(ctx, :(y > 0))
+
+result = check_sat(ctx)
+@show result.status
+@show result.model
+----
+
+== Repository Layout
+
+This repository is a wrapper for the actual package, which lives under `SMTLib.jl/`.
+
+----
+SMTLib.jl/
+├── SMTLib.jl/        # Julia package root
+│   ├── src/          # Core library
+│   ├── test/         # Unit tests
+│   ├── Project.toml  # Package metadata
+│   └── README.md     # Package docs
+└── README.adoc       # Repo overview (this file)
+----
+
+== Usage Patterns
+
+=== Solver Discovery
+
+[source,julia]
+----
+available_solvers()
+find_solver(:z3)
+----
+
+=== Incremental Solving
+
+[source,julia]
+----
+push!(ctx)
+assert!(ctx, :(x < 5))
+check_sat(ctx)
+pop!(ctx)
+----
+
+== Relationship to Axiom.jl
+
+SMTLib.jl is used by Axiom.jl for solver interaction and verification workflows.
+This repo keeps the SMT interface modular and independently reusable.
+
+== Status
+
+Stable, used across the Hyperpolymath verification stack.
+
+== License
+
+Palimpsest-MPL License v1.0 (PMPL-1.0)—see link:LICENSE[LICENSE].
