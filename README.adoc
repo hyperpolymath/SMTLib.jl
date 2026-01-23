@@ -50,16 +50,14 @@ result = check_sat(ctx)
 
 == Repository Layout
 
-This repository is a wrapper for the actual package, which lives under `SMTLib.jl/`.
+Standard Julia package structure:
 
 ----
 SMTLib.jl/
-├── SMTLib.jl/        # Julia package root
-│   ├── src/          # Core library
-│   ├── test/         # Unit tests
-│   ├── Project.toml  # Package metadata
-│   └── README.md     # Package docs
-└── README.adoc       # Repo overview (this file)
+├── src/          # Core library
+├── test/         # Unit tests
+├── Project.toml  # Package metadata
+└── README.adoc   # This file
 ----
 
 == Usage Patterns
