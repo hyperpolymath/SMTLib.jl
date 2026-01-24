@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: PMPL-1.0-or-later
 name = "SMTLib"
 uuid = "7d3f9a2c-8b4e-5c1f-a6d0-9e8f7b2c3d4e"
-authors = ["Axiom.jl Contributors"]
+authors = ["Jonathan D.A. Jewell <jonathan.jewell@open.ac.uk>"]
 version = "0.1.0"
 
 [deps]
