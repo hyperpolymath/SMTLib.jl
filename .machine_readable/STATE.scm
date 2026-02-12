@@ -10,7 +10,7 @@
 
     (current-position
      (phase . "implementation")
-     (overall-completion . 90)
+     (overall-completion . 93)
      (working-features
        "Solver discovery (z3, cvc5, yices)"
        "SMT-LIB2 expression generation"
@@ -41,9 +41,8 @@
 
     (critical-next-actions
      (immediate
-       "Commit and push to GitHub + GitLab")
+       "Add real solver integration tests")
      (short-term
-       "Add real solver integration tests"
        "Add incremental solving examples"
        "Add bitvector and floating-point examples")
      (long-term
@@ -61,4 +60,8 @@
        ((date . "2026-02-12")
         (agent . "Claude Opus 4.6")
         (summary . "Deep expansion: push/pop stacks, named assertions, unsat core, solver options, quantifiers, optimization, theory helpers, statistics, model evaluation, from_smtlib parser rewrite, parse_model rewrite. Tests 41 -> 468.")
-        (completion-delta . +22))))))
+        (completion-delta . +22))
+       ((date . "2026-02-12")
+        (agent . "Claude Opus 4.6")
+        (summary . "Complete README rewrite: expanded features (14 items), full categorized API reference (23 exports in 9 categories), usage examples for quantifiers/optimization/unsat-core, academic bibliography (4 textbooks, 4 papers). Tests verified: 468/468 pass.")
+        (completion-delta . +3))))))
