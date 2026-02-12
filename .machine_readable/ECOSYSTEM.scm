@@ -22,7 +22,16 @@
      (nature . "Direct Z3 bindings (more specialized, less portable)"))
     ((name . "JuMP.jl")
      (relationship . complementary)
-     (nature . "Mathematical optimization - SMT can handle discrete/logical constraints")))
+     (nature . "Mathematical optimization - SMT can handle discrete/logical constraints"))
+    ((name . "tangle")
+     (relationship . potential-consumer)
+     (nature . "Topological programming language - SMT-based type verification of tangle programs"))
+    ((name . "KnotTheory.jl")
+     (relationship . sibling-standard)
+     (nature . "Knot theory invariants - could use SMT to verify polynomial identities"))
+    ((name . "PolyglotFormalisms.jl")
+     (relationship . planned-dependency)
+     (nature . "Cross-language verification with SMT backend support")))
 
   (dependencies
     (runtime
