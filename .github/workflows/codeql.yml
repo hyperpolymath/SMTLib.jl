@@ -21,20 +21,18 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - language: rust
-            build-mode: none
+          - language: actions
 
     steps:
       - name: Checkout
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@662472033e021d55d94146f66f6058822b0b39fd # v3.28.1
+        uses: github/codeql-action/init@6624720a57d4c312633c7b953db2f2da5bcb4c3a # v3
         with:
           languages: ${{ matrix.language }}
-          build-mode: ${{ matrix.build-mode }}
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@662472033e021d55d94146f66f6058822b0b39fd # v3.28.1
+        uses: github/codeql-action/analyze@6624720a57d4c312633c7b953db2f2da5bcb4c3a # v3
         with:
           category: "/language:${{ matrix.language }}"

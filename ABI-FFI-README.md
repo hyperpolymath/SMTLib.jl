@@ -1,6 +1,5 @@
-{{~ Aditionally delete this line and fill out the template below ~}}
 
-# {{PROJECT}} ABI/FFI Documentation
+# SMTLib ABI/FFI Documentation
 
 ## Overview
 
@@ -26,7 +25,7 @@ This library follows the **Hyperpolymath RSR Standard** for ABI and FFI design:
                   ▼
 ┌─────────────────────────────────────────────┐
 │  C Headers (auto-generated)                 │
-│  generated/abi/{{project}}.h                │
+│  generated/abi/smtlib.h                │
 └─────────────────┬───────────────────────────┘
                   │
                   │ imported by
@@ -39,7 +38,7 @@ This library follows the **Hyperpolymath RSR Standard** for ABI and FFI design:
 │  - Memory-safe by default                   │
 └─────────────────┬───────────────────────────┘
                   │
-                  │ compiled to lib{{project}}.so/.a
+                  │ compiled to libsmtlib.so/.a
                   ▼
 ┌─────────────────────────────────────────────┐
 │  Any Language via C ABI                     │
@@ -50,7 +49,7 @@ This library follows the **Hyperpolymath RSR Standard** for ABI and FFI design:
 ## Directory Structure
 
 ```
-{{project}}/
+smtlib/
 ├── src/
 │   ├── abi/                    # ABI definitions (Idris2)
 │   │   ├── Types.idr           # Core type definitions with proofs
@@ -67,11 +66,11 @@ This library follows the **Hyperpolymath RSR Standard** for ABI and FFI design:
 │       ├── test/
 │       │   └── integration_test.zig
 │       └── include/
-│           └── {{project}}.h   # C header (optional, can be generated)
+│           └── smtlib.h   # C header (optional, can be generated)
 │
 ├── generated/                  # Auto-generated files
 │   └── abi/
-│       └── {{project}}.h       # Generated from Idris2 ABI
+│       └── smtlib.h       # Generated from Idris2 ABI
 │
 └── bindings/                   # Language-specific wrappers (optional)
     ├── rust/
@@ -199,7 +198,7 @@ zig build test                    # Run tests
 
 ```bash
 cd src/abi
-idris2 --cg c-header Types.idr -o ../../generated/abi/{{project}}.h
+idris2 --cg c-header Types.idr -o ../../generated/abi/smtlib.h
 ```
 
 ### Cross-Compile
@@ -222,32 +221,32 @@ zig build -Dtarget=x86_64-windows
 ### From C
 
 ```c
-#include "{{project}}.h"
+#include "smtlib.h"
 
 int main() {
-    void* handle = {{project}}_init();
+    void* handle = smtlib_init();
     if (!handle) return 1;
 
-    int result = {{project}}_process(handle, 42);
+    int result = smtlib_process(handle, 42);
     if (result != 0) {
-        const char* err = {{project}}_last_error();
+        const char* err = smtlib_last_error();
         fprintf(stderr, "Error: %s\n", err);
     }
 
-    {{project}}_free(handle);
+    smtlib_free(handle);
     return 0;
 }
 ```
 
 Compile with:
 ```bash
-gcc -o example example.c -l{{project}} -L./zig-out/lib
+gcc -o example example.c -lsmtlib -L./zig-out/lib
 ```
 
 ### From Idris2
 
 ```idris
-import {{PROJECT}}.ABI.Foreign
+import SMTLib.ABI.Foreign
 
 main : IO ()
 main = do
@@ -264,22 +263,22 @@ main = do
 ### From Rust
 
 ```rust
-#[link(name = "{{project}}")]
+#[link(name = "smtlib")]
 extern "C" {
-    fn {{project}}_init() -> *mut std::ffi::c_void;
-    fn {{project}}_free(handle: *mut std::ffi::c_void);
-    fn {{project}}_process(handle: *mut std::ffi::c_void, input: u32) -> i32;
+    fn smtlib_init() -> *mut std::ffi::c_void;
+    fn smtlib_free(handle: *mut std::ffi::c_void);
+    fn smtlib_process(handle: *mut std::ffi::c_void, input: u32) -> i32;
 }
 
 fn main() {
     unsafe {
-        let handle = {{project}}_init();
+        let handle = smtlib_init();
         assert!(!handle.is_null());
 
-        let result = {{project}}_process(handle, 42);
+        let result = smtlib_process(handle, 42);
         assert_eq!(result, 0);
 
-        {{project}}_free(handle);
+        smtlib_free(handle);
     }
 }
 ```
@@ -287,21 +286,21 @@ fn main() {
 ### From Julia
 
 ```julia
-const lib{{project}} = "lib{{project}}"
+const libsmtlib = "libsmtlib"
 
 function init()
-    handle = ccall((:{{project}}_init, lib{{project}}), Ptr{Cvoid}, ())
+    handle = ccall((:smtlib_init, libsmtlib), Ptr{Cvoid}, ())
     handle == C_NULL && error("Failed to initialize")
     handle
 end
 
 function process(handle, input)
-    result = ccall((:{{project}}_process, lib{{project}}), Cint, (Ptr{Cvoid}, UInt32), handle, input)
+    result = ccall((:smtlib_process, libsmtlib), Cint, (Ptr{Cvoid}, UInt32), handle, input)
     result
 end
 
 function cleanup(handle)
-    ccall((:{{project}}_free, lib{{project}}), Cvoid, (Ptr{Cvoid},), handle)
+    ccall((:smtlib_free, libsmtlib), Cvoid, (Ptr{Cvoid},), handle)
 end
 
 # Usage
@@ -355,7 +354,7 @@ When modifying the ABI/FFI:
 
 2. **Generate C header**
    ```bash
-   idris2 --cg c-header src/abi/Types.idr -o generated/abi/{{project}}.h
+   idris2 --cg c-header src/abi/Types.idr -o generated/abi/smtlib.h
    ```
 
 3. **Update FFI implementation** (`ffi/zig/src/main.zig`)
@@ -374,7 +373,7 @@ When modifying the ABI/FFI:
 
 ## License
 
-{{LICENSE}}
+PMPL-1.0-or-later
 
 ## See Also
 
