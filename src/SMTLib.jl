@@ -733,4 +733,116 @@ function is_operator(s::Symbol)
           Symbol("⟹"), Symbol("⟺")]
 end
 
+# ============================================================================
+# Missing Exported Functions (Stub Implementations - Tasks 1, 3, 4)
+# ============================================================================
+
+"""
+    push!(ctx::SMTContext)
+
+Create a backtracking point in the SMT context (push assertion stack).
+Note: Currently a stub - full implementation requires tracking assertion/declaration stacks.
+"""
+function Base.push!(ctx::SMTContext)
+    # Stub: Would need to add stack_depth and state tracking to SMTContext
+    # For now, emit a warning
+    @warn "push!/pop! not fully implemented - state tracking incomplete"
+    nothing
+end
+
+"""
+    pop!(ctx::SMTContext)
+
+Restore context to the previous backtracking point (pop assertion stack).
+Note: Currently a stub - full implementation requires tracking assertion/declaration stacks.
+"""
+function Base.pop!(ctx::SMTContext)
+    # Stub: Would need to restore from stack
+    @warn "push!/pop! not fully implemented - state tracking incomplete"
+    nothing
+end
+
+"""
+    get_model(result::SMTResult) -> Dict{Symbol, Any}
+
+Convenience function to extract the model from an SMTResult.
+Returns the model dictionary if status is :sat, empty dict otherwise.
+"""
+function get_model(result::SMTResult)
+    result.status == :sat ? result.model : Dict{Symbol, Any}()
+end
+
+"""
+    from_smtlib(s::String) -> Expr
+
+Parse an SMT-LIB2 expression string back into a Julia Expr.
+Note: Currently a minimal stub - only handles basic cases.
+
+# Examples
+```julia
+from_smtlib("(+ x y)")    # => :(x + y)
+from_smtlib("(= x 5)")    # => :(x == 5)
+from_smtlib("true")       # => true
+```
+"""
+function from_smtlib(s::String)
+    s = strip(s)
+
+    # Boolean literals
+    s == "true" && return true
+    s == "false" && return false
+
+    # Integer literals
+    if occursin(r"^-?\d+$", s)
+        return parse(Int, s)
+    end
+
+    # S-expression: (op arg1 arg2 ...)
+    if startswith(s, "(") && endswith(s, ")")
+        inner = strip(s[2:end-1])
+        parts = split(inner)
+
+        if length(parts) < 2
+            error("Malformed S-expression: $s")
+        end
+
+        op = parts[1]
+        args = [from_smtlib(String(p)) for p in parts[2:end]]
+
+        # Map SMT-LIB operators to Julia
+        julia_op = if op == "+"
+            :+
+        elseif op == "-"
+            :-
+        elseif op == "*"
+            :*
+        elseif op == "/"
+            :/
+        elseif op == "="
+            :(==)
+        elseif op == "<"
+            :<
+        elseif op == ">"
+            :>
+        elseif op == "<="
+            :(<=)
+        elseif op == ">="
+            :(>=)
+        elseif op == "and"
+            :(&&)
+        elseif op == "or"
+            :(||)
+        elseif op == "not"
+            :!
+        else
+            Symbol(op)
+        end
+
+        return Expr(:call, julia_op, args...)
+    end
+
+    # Symbol/variable
+    return Symbol(s)
+end
+
 end # module
