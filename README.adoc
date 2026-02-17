@@ -246,6 +246,12 @@ Stable, used across the Hyperpolymath verification stack.
 468 test assertions covering solver discovery, SMT-LIB generation, parsing,
 quantifiers, optimization, theory helpers, unsat cores, and integration tests.
 
+=== Release Readiness Baseline
+
+- Readiness script: `scripts/readiness-check.sh`
+- Readiness guide: `docs/release-readiness.adoc`
+- Parity checklist: `SMTLIB-AXIOM-PARITY-CHECKLIST.adoc`
+
 == References & Bibliography
 
 === Textbooks

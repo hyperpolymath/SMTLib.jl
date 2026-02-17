@@ -1,22 +1,38 @@
 // SPDX-License-Identifier: PMPL-1.0-or-later
 = SMTLib.jl Roadmap
+:revdate: 2026-02-17
+:toc:
+:toclevels: 2
 
-== Current Status
+== Current Position
+SMTLib.jl is functionally usable and tested, but still needs release/governance hardening to match the operational posture used by Axiom.jl.
 
-Initial development phase.
+== Must (Current Stage)
+- Keep package metadata and machine-readable state aligned for each release.
+- Maintain changelog, roadmap, and release-readiness docs as release gates.
+- Enforce CODEOWNERS + workflow security linting + pinned actions in CI.
+- Keep `scripts/readiness-check.sh` passing in CI (strict mode).
+- Keep install/load/test baseline healthy for JuliaHub-facing refs.
 
-== Milestones
+== Intend (Next Stage)
+- Add solver-backed integration jobs by solver kind (z3/cvc5/yices/mathsat).
+- Add deterministic evidence artifacts for capability and test summary claims.
+- Add branch-protection alignment checklist to repo docs.
+- Publish SMTLib.jl through the chosen registry path and document consumer migration.
 
-=== v0.1.0 - Foundation
-* [ ] Core functionality
-* [ ] Basic documentation
-* [ ] CI/CD pipeline
+== Like (Later)
+- Add benchmark baselines and regression thresholds.
+- Add solver compatibility matrix by version and operating system.
+- Add richer failure diagnostics and strict-mode profiles for production environments.
 
-=== v1.0.0 - Stable Release
-* [ ] Full feature set
-* [ ] Comprehensive tests
-* [ ] Production ready
+== Scope Note
+SMTLib.jl focuses on solver interoperability and verification plumbing.
 
-== Future Directions
+The following are tracked as broader Axiom platform tracks, not SMTLib immediate blockers:
+- Physics coprocessor production hardening
+- VPU production hardening
+- FPGA production hardening
+- QPU baseline/production progression
 
-_To be determined based on community feedback._
+== Tracking Artifact
+Detailed parity checklist: `SMTLIB-AXIOM-PARITY-CHECKLIST.adoc`

@@ -4,8 +4,8 @@
 (define state
   '((metadata
      (project . "SMTLib.jl")
-     (version . "0.3.0")
-     (updated . "2026-02-12")
+     (version . "0.1.0")
+     (updated . "2026-02-17")
      (maintainers . ("Jonathan D.A. Jewell <jonathan.jewell@open.ac.uk>")))
 
     (current-position
@@ -41,8 +41,9 @@
 
     (critical-next-actions
      (immediate
-       "Add real solver integration tests")
+       "Execute Must items from SMTLIB-AXIOM-PARITY-CHECKLIST.adoc")
      (short-term
+       "Add real solver integration tests"
        "Add incremental solving examples"
        "Add bitvector and floating-point examples")
      (long-term
