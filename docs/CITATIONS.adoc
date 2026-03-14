@@ -1,4 +1,4 @@
-= RSR-template-repo - Citation Guide
+= SMTLib.jl - Citation Guide
 :toc:
 
 == BibTeX
@@ -7,28 +7,28 @@
 ----
 @software{SMTLib.jl_2025,
   author = {Jewell, Jonathan D.A.},
-  title = {RSR-template-repo},
+  title = {SMTLib.jl},
   year = {2025},
-  url = {https://github.com/hyperpolymath/RSR-template-repo},
-  license = {PMPL-1.0-or-later}
+  url = {https://github.com/hyperpolymath/SMTLib.jl},
+  license = {MPL-2.0}
 }
 ----
 
 == Harvard Style
 
-Polymath, H. (2025) _RSR-template-repo_ [Computer software]. Available at: https://github.com/hyperpolymath/RSR-template-repo
+Jewell, J.D.A. (2025) _SMTLib.jl_ [Computer software]. Available at: https://github.com/hyperpolymath/SMTLib.jl
 
 == OSCOLA
 
-Hyper Polymath, 'RSR-template-repo' (2025) <https://github.com/hyperpolymath/RSR-template-repo>
+Jonathan D.A. Jewell, 'SMTLib.jl' (2025) <https://github.com/hyperpolymath/SMTLib.jl>
 
 == MLA
 
-Jewell, Jonathan D.A.. "RSR-template-repo." 2025, github.com/hyperpolymath/RSR-template-repo.
+Jewell, Jonathan D.A. "SMTLib.jl." 2025, github.com/hyperpolymath/SMTLib.jl.
 
 == APA 7
 
-Polymath, H. (2025). _RSR-template-repo_ [Computer software]. GitHub. https://github.com/hyperpolymath/RSR-template-repo
+Jewell, J. D. A. (2025). _SMTLib.jl_ [Computer software]. GitHub. https://github.com/hyperpolymath/SMTLib.jl
 
 == See Also
 
