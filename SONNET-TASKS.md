@@ -104,7 +104,7 @@ println("TASK 1 PASSED")
 **Problem:**
 The `examples/` directory contains a ReScript DOM-mounting example and a Deno
 project config. Neither has anything to do with SMT solving. They are leftover
-RSR template files. The SPDX header in `SafeDOMExample.res` is `AGPL-3.0-or-later`
+RSR template files. The SPDX header in `SafeDOMExample.res` is `PMPL-1.0-or-later`
 which violates the license policy (should be PMPL-1.0-or-later or at least not AGPL).
 
 **What to do:**
@@ -258,7 +258,7 @@ Dozens of `hyperpolymath`, `SMTLib.jl`, `github.com`, `SMTLib.Jl`,
    - Remove template instruction block.
 4. In CITATIONS.adoc:
    - Replace `rsr-template-repo` with `SMTLib.jl`.
-   - Replace `AGPL-3.0-or-later` with `PMPL-1.0-or-later`.
+   - Replace `PMPL-1.0-or-later` with `PMPL-1.0-or-later`.
    - Replace author `Polymath, Hyper` with `Jewell, Jonathan D.A.`
 5. In ROADMAP.adoc:
    - Replace "YOUR Template Repo" with "SMTLib.jl".
@@ -297,14 +297,14 @@ echo "TASK 5 PASSED (if all above are empty/0)"
 **Problem:**
 Every ABI and FFI file is the raw RSR template with `{{PROJECT}}` and
 `{{project}}` placeholders. None of these files will compile. Additionally,
-the SPDX headers in the Zig files say `AGPL-3.0-or-later` instead of
+the SPDX headers in the Zig files say `PMPL-1.0-or-later` instead of
 `PMPL-1.0-or-later`.
 
 **What to do:**
 1. In all `.idr` files: replace `{{PROJECT}}` with `SMTLib`.
 2. In all `.zig` files: replace `{{PROJECT}}` with `SMTLib` and `{{project}}`
    with `smtlib`.
-3. In all `.zig` files: change SPDX from `AGPL-3.0-or-later` to
+3. In all `.zig` files: change SPDX from `PMPL-1.0-or-later` to
    `PMPL-1.0-or-later`.
 4. Consider whether the ABI/FFI layer makes sense for a pure-Julia SMT interface.
    If it does not, add a note to `ABI-FFI-README.md` explaining that the ABI/FFI
