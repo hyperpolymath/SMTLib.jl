@@ -227,32 +227,32 @@ println("TASK 4 PASSED")
 ## TASK 5: Replace All {{PLACEHOLDER}} Tokens in RSR Files
 
 **Files:**
-- `/var/mnt/eclipse/repos/SMTLib.jl/SECURITY.md` ({{OWNER}}, {{REPO}}, {{PROJECT_NAME}}, etc.)
-- `/var/mnt/eclipse/repos/SMTLib.jl/CONTRIBUTING.md` ({{FORGE}}, {{OWNER}}, {{REPO}})
-- `/var/mnt/eclipse/repos/SMTLib.jl/CODE_OF_CONDUCT.md` ({{OWNER}}, {{REPO}}, etc.)
+- `/var/mnt/eclipse/repos/SMTLib.jl/SECURITY.md` (hyperpolymath, SMTLib.jl, SMTLib.Jl, etc.)
+- `/var/mnt/eclipse/repos/SMTLib.jl/CONTRIBUTING.md` (github.com, hyperpolymath, SMTLib.jl)
+- `/var/mnt/eclipse/repos/SMTLib.jl/CODE_OF_CONDUCT.md` (hyperpolymath, SMTLib.jl, etc.)
 - `/var/mnt/eclipse/repos/SMTLib.jl/docs/CITATIONS.adoc` (wrong project name, AGPL license ref)
 - `/var/mnt/eclipse/repos/SMTLib.jl/ROADMAP.adoc` (says "YOUR Template Repo Roadmap")
 - `/var/mnt/eclipse/repos/SMTLib.jl/ABI-FFI-README.md` (line 1: "delete this line")
 
 **Problem:**
-Dozens of `{{OWNER}}`, `{{REPO}}`, `{{FORGE}}`, `{{PROJECT_NAME}}`,
-`{{SECURITY_EMAIL}}`, `{{PGP_FINGERPRINT}}`, etc. remain unreplaced.
+Dozens of `hyperpolymath`, `SMTLib.jl`, `github.com`, `SMTLib.Jl`,
+`6759885+hyperpolymath@users.noreply.github.com`, `[PGP fingerprint not set]`, etc. remain unreplaced.
 `ROADMAP.adoc` line 2 says "YOUR Template Repo Roadmap." `CITATIONS.adoc` cites
 "rsr-template-repo" with AGPL license. The ABI-FFI-README.md line 1 still says
 "delete this line."
 
 **What to do:**
 1. In SECURITY.md:
-   - `{{PROJECT_NAME}}` -> `SMTLib.jl`
-   - `{{OWNER}}` -> `hyperpolymath`
-   - `{{REPO}}` -> `SMTLib.jl`
-   - `{{SECURITY_EMAIL}}` -> `jonathan.jewell@open.ac.uk`
+   - `SMTLib.Jl` -> `SMTLib.jl`
+   - `hyperpolymath` -> `hyperpolymath`
+   - `SMTLib.jl` -> `SMTLib.jl`
+   - `6759885+hyperpolymath@users.noreply.github.com` -> `jonathan.jewell@open.ac.uk`
    - Remove the template instruction comment block (lines 3-19).
    - Remove PGP sections if not applicable.
 2. In CONTRIBUTING.md:
-   - `{{FORGE}}` -> `github.com`
-   - `{{OWNER}}` -> `hyperpolymath`
-   - `{{REPO}}` -> `SMTLib.jl`
+   - `github.com` -> `github.com`
+   - `hyperpolymath` -> `hyperpolymath`
+   - `SMTLib.jl` -> `SMTLib.jl`
 3. In CODE_OF_CONDUCT.md:
    - Same replacements as above.
    - Remove template instruction block.
@@ -266,7 +266,7 @@ Dozens of `{{OWNER}}`, `{{REPO}}`, `{{FORGE}}`, `{{PROJECT_NAME}}`,
 6. In ABI-FFI-README.md:
    - Delete line 1 (`{{~ Aditionally delete this line...}}`).
    - Replace `{{PROJECT}}` with `SMTLib` and `{{project}}` with `smtlib`.
-   - Replace `{{LICENSE}}` with `PMPL-1.0-or-later`.
+   - Replace `PMPL-1.0-or-later` with `PMPL-1.0-or-later`.
 
 **Verification:**
 ```bash
