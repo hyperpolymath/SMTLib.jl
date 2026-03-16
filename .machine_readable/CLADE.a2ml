@@ -1,0 +1,26 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# Clade declaration — part of the gv-clade-index registry
+# See: https://github.com/hyperpolymath/gv-clade-index
+
+[identity]
+uuid = "7a79773e-651b-5331-9904-90fa7d6de4df"
+primary-forge = "github"
+primary-owner = "hyperpolymath"
+canonical-name = "SMTLib.jl"
+prefixed-name = "fv-SMTLib.jl"
+
+[clade]
+primary = "fv"
+secondary = []
+assigned = "2026-03-16"
+rationale = ""
+
+[forges]
+github = "hyperpolymath/SMTLib.jl"
+gitlab = "hyperpolymath/SMTLib.jl"
+bitbucket = "hyperpolymath/SMTLib.jl"
+
+[lineage]
+type = "standalone"
+parent = "Julia package — SMT-LIB interface"
+born = "2026-03-16"
