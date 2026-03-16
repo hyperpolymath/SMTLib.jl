@@ -5,7 +5,7 @@
 #         optimization, theory helpers, statistics, model evaluation,
 #         unsat core, and edge cases.
 #
-# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <jonathan.jewell@open.ac.uk>
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
 
 using Test
 using SMTLib
