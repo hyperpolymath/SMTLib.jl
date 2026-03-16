@@ -246,7 +246,7 @@ Dozens of `hyperpolymath`, `SMTLib.jl`, `github.com`, `SMTLib.Jl`,
    - `SMTLib.Jl` -> `SMTLib.jl`
    - `hyperpolymath` -> `hyperpolymath`
    - `SMTLib.jl` -> `SMTLib.jl`
-   - `6759885+hyperpolymath@users.noreply.github.com` -> `jonathan.jewell@open.ac.uk`
+   - `6759885+hyperpolymath@users.noreply.github.com` -> `j.d.a.jewell@open.ac.uk`
    - Remove the template instruction comment block (lines 3-19).
    - Remove PGP sections if not applicable.
 2. In CONTRIBUTING.md:
