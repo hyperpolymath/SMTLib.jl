@@ -1575,4 +1575,8 @@ using SMTLib
         @test :a in core4
     end
 
+    # CRG Grade C tests
+    include("e2e_test.jl")
+    include("property_test.jl")
+
 end
