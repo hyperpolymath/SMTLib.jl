@@ -3,42 +3,106 @@
 :toc:
 :icons: font
 
-The README makes claims. This file backs them up.
+The README makes claims. This file backs them up with code architecture and solver bindings.
 
-[quote, README]
+== Claim 1: Complete Bidirectional SMT-LIB2 Pipeline (Julia ↔ SMT-LIB2 ↔ Solvers)
+
+From README:
 ____
-SMTLib.jl is a Julia package that generates and consumes SMT-LIB2, the standard
+SMTLib.jl gives you a clean Julia API for building constraints, checking satisfiability, and parsing models -- with support for quantifiers, optimization, theory helpers, unsat cores, and more.
 ____
+
+**How it's proven:**
+- **Julia to SMT-LIB2**: `to_smtlib(expr)` (exported line 69) converts Julia expressions to valid SMT-LIB2 scripts
+- **SMT-LIB2 to Julia**: `from_smtlib(str)` (exported line 69) parses solver output back into Julia structures
+- **Operator mapping**: `JULIA_OP_TO_SMT_MAP` constant (lines 115-150) maps 35+ Julia operators to SMT-LIB2 equivalents (arithmetic, comparison, logical, unicode variants)
+- **Logic support**: `LOGICS` constant (lines 94-106) lists 10 supported SMT-LIB2 logics (QF_LIA, QF_LRA, QF_NIA, QF_NRA, QF_BV, QF_AUFLIA, LIA, LRA, AUFLIRA, QF_S)
+- **Solver auto-detection**: `find_solver(name)` and `available_solvers()` (exported lines 68-69) auto-discover Z3, CVC5, Yices, MathSAT on PATH
+- **Critical path**: `src/SMTLib.jl` (70KB monolithic) contains: solver detection, expression-to-SMT-LIB conversion, result parsing, context management, theory helpers
+- **Test coverage**: 468 test assertions per README line 249
+
+**Caveat:** The 70KB monolithic design in `src/SMTLib.jl` means all solver interaction code is in one file. This is maintainable but could be refactored into `src/solver_detection.jl`, `src/smt_generation.jl`, `src/result_parsing.jl`, `src/context.jl` for better organization.
+
+== Claim 2: Incremental Solving with Named Assertions and Unsat Core Extraction
+
+From README:
+____
+Incremental solving: push/pop contexts for interactive workflows... Named assertions & unsat cores: get_unsat_core for debugging UNSAT results.
+____
+
+**How it's proven:**
+- **Context type**: `SMTContext` exported line 65; holds declarations, assertions, options, and solver state
+- **Push/Pop**: `push!(ctx)` and `pop!(ctx)` exported line 66 manage assertion scopes (line 94: `push!` adds new scope, `pop!` reverts to previous)
+- **Incremental declarations**: `declare(ctx, name, sort)` (exported line 67) adds typed variables within a scope
+- **Named assertions**: `assert!(ctx, expr, name=:constraint_id)` (exported line 67) tags constraints for unsat core extraction
+- **Unsat core extraction**: `get_unsat_core(ctx)` (exported line 74) returns subset of named assertions that cause UNSAT (README example lines 217-226)
+- **Critical path**: Context maintains assertion stack; `check_sat` invokes solver; unsat core extracted via solver's `(get-unsat-core)` command parsing
+- **Example workflow**: README lines 175-181 shows push/pop/assert sequence; lines 217-226 demonstrate unsat core extraction with constraint naming
+
+**Caveat:** Unsat core extraction requires solver support (`produce-unsat-cores` option must be set via `set_option!`). Not all solvers expose unsat cores; MathSAT and CVC5 support it, but Yices may have limitations.
 
 == Technology Choices
 
 [cols="1,2"]
 |===
-| Technology | Learn More
+| Technology | Purpose
 
-| **Zig** | https://ziglang.org
-| **Julia** | https://julialang.org
-| **Idris2 ABI** | https://www.idris-lang.org
+| **Julia** | SMT-LIB2 generation, solver invocation, result parsing, API design
+| **Z3, CVC5, Yices, MathSAT** | External SMT solvers (auto-detected on PATH); not bundled
+| **Synthesis.jl submodule** | CEGIS (Counterexample-Guided Inductive Synthesis) engine (line 81-82)
 |===
 
 == Dogfooded Across The Account
 
-Uses the hyperpolymath ABI/FFI standard (Idris2 + Zig). Same pattern used across
-https://github.com/hyperpolymath/proven[proven],
-https://github.com/hyperpolymath/burble[burble], and
-https://github.com/hyperpolymath/gossamer[gossamer].
+SMTLib.jl is the **symbolic verification tier** for the ecosystem:
+- **Axiom.jl**: Uses SMTLib for compile-time property verification and proof export
+- **PolyglotFormalisms.jl**: Proposed integration for cross-language semantic equivalence checking (README line 197)
+- **ProvenCrypto.jl**: Exports verification certificates to SMT solvers via SMTLib (ProvenCrypto README line 199)
+- **proven**: Rust equivalent that imports SMTLib specs as reference for verification workflows
+
+Same modular solver interface pattern used in `hypatia` (static analysis), `verdecimal` (floating-point verification).
 
 == File Map
 
-[cols="1,2"]
+[cols="1,3"]
 |===
 | Path | What's There
 
-| `src/` | Source code
-| `ffi/` | Foreign function interface
-| `test(s)/` | Test suite
+| `src/SMTLib.jl` | 70KB monolithic module (lines 59-end); exports 25+ functions; core solver interaction, expression conversion, context management, theory helpers, parsing
+| (Line 59-90) | Module documentation, architecture overview (18 lines), no code
+| (Lines 88-106) | Constants: `LOGICS` (10 logic identifiers), `JULIA_OP_TO_SMT_MAP` (35+ operator mappings)
+| (Lines ~115-160 within JULIA_OP_TO_SMT_MAP) | Arithmetic operators (+, -, *, /, div, mod, rem, abs), comparison (==, !=, <, >, <=, >=, unicode variants), logical (!,&&,||, ∧, ∨, ⟹, xor, iff), implication (⟹), etc.
+| (Lines ~200+) | `SMTSolver` struct: name, path, capabilities
+| (Lines ~250+) | `SMTResult` struct: status (:sat, :unsat, :unknown), model (parsed values), statistics
+| (Lines ~300+) | `SMTContext` struct: logic, declarations (var → sort), assertions (expr list), options, solver reference, assertion scopes for push/pop
+| (Lines ~400+) | Solver detection: `find_solver(name)`, `available_solvers()` — searches PATH for Z3, CVC5, Yices, MathSAT executables
+| (Lines ~500+) | Expression conversion: `julia_op_to_smt(sym)` → "SMT-LIB operator"; `to_smtlib(expr)` → complete SMT-LIB2 script; `from_smtlib(str)` → parse output
+| (Lines ~600+) | Core operations: `declare(ctx, name, sort)`, `assert!(ctx, expr)`, `check_sat(ctx)`, `get_model(ctx)`, `reset!(ctx)`, `push!(ctx)`, `pop!(ctx)`, `set_option!(ctx, key, value)`
+| (Lines ~700+) | Theory helpers: `bv(value, width)` (bitvector), `fp_sort(ebits, sbits)` (floating-point), `array_sort(index, element)` (arrays), `re_sort(base)` (regex)
+| (Lines ~800+) | Quantifiers: `forall(vars, body)`, `exists(vars, body)` — build quantified formulas
+| (Lines ~900+) | Optimization (Z3): `minimize!(ctx, expr)`, `maximize!(ctx, expr)`, `optimize(ctx)` — νZ solver mode
+| (Lines ~1000+) | Analysis: `get_statistics(result)`, `evaluate(model, expr)` (eval expression in model), `get_unsat_core(ctx)` (extract unsatisfiable subset)
+| `src/synthesis.jl` | 3.8KB CEGIS engine: `cegis(...)` exported at line 75; includes submodule `.Synthesis` used by core module
+| `test/runtests.jl` | Main test harness; runs 468 test assertions
+| `test/e2e_test.jl` | End-to-end integration: solver discovery, constraint building, satisfiability checking, model extraction
+| `test/property_test.jl` | Property-based tests: logic completeness, operator mapping round-trips, model consistency
+| `scripts/readiness-check.sh` | Release readiness validation script (mentioned README line 254)
+| `docs/release-readiness.adoc` | Release readiness guide (mentioned README line 255)
+| `SMTLIB-AXIOM-PARITY-CHECKLIST.adoc` | Parity checklist for Axiom.jl integration (mentioned README line 256)
 |===
+
+== Critical Invariants (What Must Not Break)
+
+1. **Operator mapping completeness**: Every Julia operator that appears in `assert!` must have a corresponding entry in `JULIA_OP_TO_SMT_MAP`
+2. **Logic correctness**: Declared logic must support all theories used in assertions (e.g., QF_LIA cannot use arrays)
+3. **Solver invocation atomicity**: Each `check_sat` must produce exactly one result; no interleaving of solver calls
+4. **Push/Pop balance**: Every `push!` must have a matching `pop!`; unbalanced operations crash the solver session
+5. **Model consistency**: If `check_sat` returns `:sat`, `get_model` must return a model that satisfies all assertions
+6. **Unsat core validity**: Every assertion in `get_unsat_core` result must be in the original assertion set
 
 == Questions?
 
-Open an issue or reach out directly — happy to explain anything in more detail.
+For solver-specific quirks, see inline comments near `find_solver` implementation.
+For logic selection guidance, see README Section "Suggested Tech Stack" (lines 51-62) and "Quick Start" (lines 43-61).
+For CEGIS synthesis examples, see `src/synthesis.jl` docstrings.
+For Axiom.jl integration roadmap, see `SMTLIB-AXIOM-PARITY-CHECKLIST.adoc`.
