@@ -1,5 +1,5 @@
--- SPDX-License-Identifier: PMPL-1.0-or-later
-||| Foreign Function Interface Declarations
+||| SPDX-License-Identifier: PMPL-1.0-or-later
+||| Foreign Function Interface Declarations for SMTLIB.JL
 |||
 ||| This module declares all C-compatible functions that will be
 ||| implemented in the Zig FFI layer.
@@ -7,10 +7,10 @@
 ||| All functions are declared here with type signatures and safety proofs.
 ||| Implementations live in ffi/zig/
 
-module SMTLib.ABI.Foreign
+module SMTLib.jl.ABI.Foreign
 
-import SMTLib.ABI.Types
-import SMTLib.ABI.Layout
+import SMTLib.jl.ABI.Types
+import SMTLib.jl.ABI.Layout
 
 %default total
 
@@ -21,7 +21,7 @@ import SMTLib.ABI.Layout
 ||| Initialize the library
 ||| Returns a handle to the library instance, or Nothing on failure
 export
-%foreign "C:smtlib_init, libsmtlib"
+%foreign "C:SMTLib.jl_init, libSMTLib.jl"
 prim__init : PrimIO Bits64
 
 ||| Safe wrapper for library initialization
@@ -33,7 +33,7 @@ init = do
 
 ||| Clean up library resources
 export
-%foreign "C:smtlib_free, libsmtlib"
+%foreign "C:SMTLib.jl_free, libSMTLib.jl"
 prim__free : Bits64 -> PrimIO ()
 
 ||| Safe wrapper for cleanup
@@ -47,7 +47,7 @@ free h = primIO (prim__free (handlePtr h))
 
 ||| Example operation: process data
 export
-%foreign "C:smtlib_process, libsmtlib"
+%foreign "C:SMTLib.jl_process, libSMTLib.jl"
 prim__process : Bits64 -> Bits32 -> PrimIO Bits32
 
 ||| Safe wrapper with error handling
@@ -70,12 +70,12 @@ prim__getString : Bits64 -> String
 
 ||| Free C string
 export
-%foreign "C:smtlib_free_string, libsmtlib"
+%foreign "C:SMTLib.jl_free_string, libSMTLib.jl"
 prim__freeString : Bits64 -> PrimIO ()
 
 ||| Get string result from library
 export
-%foreign "C:smtlib_get_string, libsmtlib"
+%foreign "C:SMTLib.jl_get_string, libSMTLib.jl"
 prim__getResult : Bits64 -> PrimIO Bits64
 
 ||| Safe string getter
@@ -96,7 +96,7 @@ getString h = do
 
 ||| Process array data
 export
-%foreign "C:smtlib_process_array, libsmtlib"
+%foreign "C:SMTLib.jl_process_array, libSMTLib.jl"
 prim__processArray : Bits64 -> Bits64 -> Bits32 -> PrimIO Bits32
 
 ||| Safe array processor
@@ -123,7 +123,7 @@ processArray h buf len = do
 
 ||| Get last error message
 export
-%foreign "C:smtlib_last_error, libsmtlib"
+%foreign "C:SMTLib.jl_last_error, libSMTLib.jl"
 prim__lastError : PrimIO Bits64
 
 ||| Retrieve last error as string
@@ -150,7 +150,7 @@ errorDescription NullPointer = "Null pointer"
 
 ||| Get library version
 export
-%foreign "C:smtlib_version, libsmtlib"
+%foreign "C:SMTLib.jl_version, libSMTLib.jl"
 prim__version : PrimIO Bits64
 
 ||| Get version as string
@@ -162,7 +162,7 @@ version = do
 
 ||| Get library build info
 export
-%foreign "C:smtlib_build_info, libsmtlib"
+%foreign "C:SMTLib.jl_build_info, libSMTLib.jl"
 prim__buildInfo : PrimIO Bits64
 
 ||| Get build information
@@ -181,16 +181,16 @@ public export
 Callback : Type
 Callback = Bits64 -> Bits32 -> Bits32
 
-||| Register a callback (typed foreign declaration avoids unsafe cast)
+||| Register a callback
 export
-%foreign "C:smtlib_register_callback, libsmtlib"
-prim__registerCallback : Bits64 -> (Bits64 -> Bits32 -> Bits32) -> PrimIO Bits32
+%foreign "C:SMTLib.jl_register_callback, libSMTLib.jl"
+prim__registerCallback : Bits64 -> AnyPtr -> PrimIO Bits32
 
 ||| Safe callback registration
 export
 registerCallback : Handle -> Callback -> IO (Either Result ())
 registerCallback h cb = do
-  result <- primIO (prim__registerCallback (handlePtr h) cb)
+  result <- primIO (prim__registerCallback (handlePtr h) (cast cb))
   pure $ case resultFromInt result of
     Just Ok => Right ()
     Just err => Left err
@@ -206,7 +206,7 @@ registerCallback h cb = do
 
 ||| Check if library is initialized
 export
-%foreign "C:smtlib_is_initialized, libsmtlib"
+%foreign "C:SMTLib.jl_is_initialized, libSMTLib.jl"
 prim__isInitialized : Bits64 -> PrimIO Bits32
 
 ||| Check initialization status
