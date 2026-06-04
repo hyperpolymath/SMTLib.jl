@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MPL-2.0
+// Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 = SMTLib.jl Release Readiness
 
 This checklist is the minimum release gate for tagged and JuliaHub-facing refs.
