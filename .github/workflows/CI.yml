@@ -21,12 +21,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v4
       - name: Setup Julia
-        uses: julia-actions/setup-julia@a0a0978e4ec4b89e96c418be701e7d94bc0c62fc # v2.3.0
+        uses: julia-actions/setup-julia@fa02766e078afaaf09b14210362cee14137e6a32 # v3.0.2
         with:
           version: ${{ matrix.julia-version }}
           arch: ${{ matrix.arch }}
       - name: Cache Julia artifacts
-        uses: julia-actions/cache@580d2b69d895343992af2cbad49c32a2b8325da0 # v2.0.1
+        uses: julia-actions/cache@a45e8fa8be21c18a06b7177052533149e61e9b38 # v3.1.0
       - name: Build package
         uses: julia-actions/julia-buildpkg@e3eb439fad4f9aba7da2667e7510e4a46ebc46e1 # v1.7.0
       - name: Run tests
