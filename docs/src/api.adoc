@@ -1,57 +1,60 @@
-<!--
-SPDX-License-Identifier: CC-BY-SA-4.0
-Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
--->
-# API Reference
+== API Reference
 
-## Types
+=== Types
 
-```@docs
+[source,@docs]
+----
 SMTLib.SMTSolver
 SMTLib.SMTResult
 SMTLib.SMTContext
-```
+----
 
-## Solver Discovery
+=== Solver Discovery
 
-```@docs
+[source,@docs]
+----
 SMTLib.available_solvers
 SMTLib.find_solver
-```
+----
 
-## Context Management
+=== Context Management
 
-```@docs
+[source,@docs]
+----
 SMTLib.SMTContext
 SMTLib.declare
 SMTLib.assert!
 SMTLib.check_sat
 SMTLib.get_model
 SMTLib.reset!
-```
+----
 
-## Incremental Solving
+=== Incremental Solving
 
-```@docs
+[source,@docs]
+----
 Base.push!(::SMTLib.SMTContext)
 Base.pop!(::SMTLib.SMTContext)
-```
+----
 
-## Conversion
+=== Conversion
 
-```@docs
+[source,@docs]
+----
 SMTLib.to_smtlib
 SMTLib.from_smtlib
-```
+----
 
-## Macros
+=== Macros
 
-```@docs
+[source,@docs]
+----
 SMTLib.@smt
-```
+----
 
-## Constants
+=== Constants
 
-```@docs
+[source,@docs]
+----
 SMTLib.LOGICS
-```
+----

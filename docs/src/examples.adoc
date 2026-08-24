@@ -1,12 +1,9 @@
-<!--
-SPDX-License-Identifier: CC-BY-SA-4.0
-Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
--->
-# Examples
+== Examples
 
-## Basic Constraint Solving
+=== Basic Constraint Solving
 
-```julia
+[source,julia]
+----
 using SMTLib
 
 # Linear integer arithmetic
@@ -19,11 +16,12 @@ assert!(ctx, :(y >= 0))
 
 result = check_sat(ctx)
 @show result.model  # Dict(:x => 4, :y => 3) or similar
-```
+----
 
-## Incremental Solving
+=== Incremental Solving
 
-```julia
+[source,julia]
+----
 ctx = SMTContext(logic=:QF_LIA)
 declare(ctx, :x, Int)
 assert!(ctx, :(x > 5))
@@ -39,11 +37,12 @@ result2 = check_sat(ctx)  # unsat
 # Backtrack
 pop!(ctx)
 result3 = check_sat(ctx)  # sat again
-```
+----
 
-## Bitvector Constraints
+=== Bitvector Constraints
 
-```julia
+[source,julia]
+----
 ctx = SMTContext(logic=:QF_BV)
 declare(ctx, :a, BitVec{8})
 declare(ctx, :b, BitVec{8})
@@ -53,11 +52,12 @@ assert!(ctx, :(bvadd(a, b) == 0xFF))
 assert!(ctx, :(bvand(a, b) == 0x00))
 
 result = check_sat(ctx)
-```
+----
 
-## Real Arithmetic
+=== Real Arithmetic
 
-```julia
+[source,julia]
+----
 ctx = SMTContext(logic=:QF_LRA)
 declare(ctx, :x, Real)
 declare(ctx, :y, Real)
@@ -67,11 +67,12 @@ assert!(ctx, :(x - y < 2.0))
 assert!(ctx, :(x > 0))
 
 result = check_sat(ctx)
-```
+----
 
-## Array Theory
+=== Array Theory
 
-```julia
+[source,julia]
+----
 ctx = SMTContext(logic=:QF_AUFLIA)
 declare(ctx, :arr, Array{Int,Int})
 declare(ctx, :i, Int)
@@ -83,11 +84,12 @@ assert!(ctx, :(select(store(arr, j, 100), j) == 100))
 assert!(ctx, :(i != j))
 
 result = check_sat(ctx)
-```
+----
 
-## Unsat Core
+=== Unsat Core
 
-```julia
+[source,julia]
+----
 ctx = SMTContext(logic=:QF_LIA)
 declare(ctx, :x, Int)
 
@@ -98,11 +100,12 @@ assert!(ctx, :(x >= 0), name=:c3)
 
 result = check_sat(ctx, unsat_core=true)
 @show result.unsat_core  # [:c1, :c2] - conflicting constraints
-```
+----
 
-## Timeout Handling
+=== Timeout Handling
 
-```julia
+[source,julia]
+----
 ctx = SMTContext(logic=:QF_NRA, timeout=5000)  # 5 second timeout
 declare(ctx, :x, Real)
 assert!(ctx, :(x^5 + x^3 + x == 42))  # Hard nonlinear constraint
@@ -111,11 +114,12 @@ result = check_sat(ctx)
 if result.status == :timeout
     println("Solver timed out")
 end
-```
+----
 
-## Using the @smt Macro
+=== Using the @smt Macro
 
-```julia
+[source,julia]
+----
 # Convenient syntax for simple queries
 result = @smt begin
     x::Int
@@ -129,11 +133,12 @@ if result.status == :sat
     println("x = ", result.model[:x])
     println("y = ", result.model[:y])
 end
-```
+----
 
-## Multiple Solvers
+=== Multiple Solvers
 
-```julia
+[source,julia]
+----
 # Find all available solvers
 solvers = available_solvers()
 for solver in solvers
@@ -143,11 +148,12 @@ end
 # Use a specific solver
 z3 = find_solver(:z3)
 ctx = SMTContext(solver=z3, logic=:QF_LIA)
-```
+----
 
-## Complex Constraints
+=== Complex Constraints
 
-```julia
+[source,julia]
+----
 ctx = SMTContext(logic=:QF_NIA)
 declare(ctx, :x, Int)
 declare(ctx, :y, Int)
@@ -162,4 +168,4 @@ result = check_sat(ctx)
 if result.status == :sat
     @show result.model
 end
-```
+----
