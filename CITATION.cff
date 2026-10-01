@@ -1,0 +1,25 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "SMTLib.jl"
+abstract: "Julia package: SMTLib"
+authors:
+  - family-names: "Jewell"
+    given-names: "Jonathan D.A."
+    orcid: "https://orcid.org/0000-0002-3078-6652"
+repository-code: "https://github.com/hyperpolymath/SMTLib.jl"
+keywords:
+  - "hyperpolymath"
+  - "julia"
+  - "open-source"
+  - "computational-science"
+  - "epistemic-computing"
+  - "epistemic-infrastructure"
+  - "equivalence-aware-computing"
+  - "julia-package"
+  - "reproducible-research"
+  - "research-software"
+  - "scientific-software"
+  - "smt-solving"
+  - "typed-provenance"
+  - "veridical-computing"
