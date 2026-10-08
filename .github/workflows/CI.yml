@@ -28,6 +28,6 @@ jobs:
       - name: Build package
         uses: julia-actions/julia-buildpkg@e3eb439fad4f9aba7da2667e7510e4a46ebc46e1 # v1.7.0
       - name: Run tests
-        uses: julia-actions/julia-runtest@79a7e100883947123f8263c5f06e6c2fee60dd0c # v1.10.0
+        uses: julia-actions/julia-runtest@d0c4f093badade621cd041bba567d1e832480ac2 # v1.10.0
       - name: Process coverage
         uses: julia-actions/julia-processcoverage@03114f09f119417c3242a9fb6e0b722676aedf38 # v1.2.2

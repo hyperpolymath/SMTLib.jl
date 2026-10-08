@@ -39,7 +39,7 @@ function _math_solve_exact(A::AbstractMatrix, b::AbstractVector)
         found = 0
         for row in pr:m; aug[row, col] != 0 && (found = row; break); end
         found == 0 && continue
-        found != pr && (aug[pr, :], aug[found, :] = aug[found, :], aug[pr, :])
+        found != pr && (aug[[pr, found], :] = aug[[found, pr], :])
         push!(pcols, col)
         pv = aug[pr, col]
         for row in (pr+1):m
