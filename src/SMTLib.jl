@@ -1263,8 +1263,10 @@ const STATISTICS_LIST_REGEX = r"\"(?:[^\"]|\"\")*\"|\(:(?:[^()\"]|\"(?:[^\"]|\"\
 
 # One `:key value` pair inside such a list. The key must start a token (it
 # follows `(` or whitespace); the value is a quoted string or a single atom,
-# optionally itself a keyword (`:key :value`).
-const STATISTICS_PAIR_REGEX = r"(?<![^\s(]):([^\s()\":]+)\s+(\"(?:[^\"]|\"\")*\"|:?[^\s()\"]+)"
+# optionally itself a keyword (`:key :value`). The first alternative consumes a
+# quoted string that is not a value, so `:key value` text inside it is never
+# read as a pair; such a match has no captures.
+const STATISTICS_PAIR_REGEX = r"\"(?:[^\"]|\"\")*\"|(?<![^\s(]):([^\s()\":]+)\s+(\"(?:[^\"]|\"\")*\"|:?[^\s()\"]+)"
 
 """
     parse_statistics(output::String) -> Dict{String, Any}
@@ -1283,6 +1285,7 @@ function parse_statistics(output::String)
         startswith(list.match, '"') && continue  # a string literal, not a list
         for m in eachmatch(STATISTICS_PAIR_REGEX, list.match)
             key = m.captures[1]
+            key === nothing && continue  # a stray string literal, not a pair
             val_str = m.captures[2]
             # Strip leading : from a keyword value
             if startswith(val_str, ":")

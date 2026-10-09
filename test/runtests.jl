@@ -893,7 +893,27 @@ using SMTLib
             result = SMTResult(:sat, Dict{Symbol,Any}(), Symbol[],
                               Dict{String,Any}(), "sat\n")
             stats = get_statistics(result)
-            @test isempty(stats) || !isempty(stats)  # May or may not find stats
+            @test isempty(stats)
+        end
+
+        @testset "Multi-line keyword list (Z3 layout)" begin
+            output = "unsat\n(:conflicts           1\n :max-memory          17.82\n :num-allocs          35972\n :time                0.00)\n"
+            stats = SMTLib.parse_statistics(output)
+            @test stats["conflicts"] == 1
+            @test stats["max-memory"] == 17.82
+            @test stats["num-allocs"] == 35972
+            @test stats["time"] == 0.0
+            @test length(stats) == 4
+        end
+
+        @testset "Quoted strings are not read as pairs or lists" begin
+            stats = SMTLib.parse_statistics("(:name \"Z3 (x) :time 99\" :version \"4.13.3\")")
+            @test stats == Dict{String,Any}("name" => "Z3 (x) :time 99", "version" => "4.13.3")
+            stats = SMTLib.parse_statistics("(:a 1 \"stray :time 99\")")
+            @test stats == Dict{String,Any}("a" => 1)
+            @test isempty(SMTLib.parse_statistics("(error \"line 3: unknown (:foo bar)\")"))
+            @test SMTLib.parse_statistics("(:reason-unknown :incomplete)") ==
+                  Dict{String,Any}("reason-unknown" => "incomplete")
         end
     end
 
