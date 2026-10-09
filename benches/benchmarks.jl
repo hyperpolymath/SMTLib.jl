@@ -24,17 +24,17 @@ SUITE["context"]["create"] = @benchmarkable SMTContext()
 
 SUITE["context"]["declare_assert_script_10"] = @benchmarkable begin
     ctx = SMTContext()
-    declare_const(ctx, :x, :Int)
+    declare(ctx, :x, Int)
     for i in 1:10
         assert!(ctx, :(x > 0))
     end
-    to_smtlib_script(ctx)
+    SMTLib.build_script(ctx, false)
 end
 
 SUITE["context"]["declare_10_consts"] = @benchmarkable begin
     ctx = SMTContext()
     for i in 1:10
-        declare_const(ctx, Symbol("v$i"), :Int)
+        declare(ctx, Symbol("v$i"), Int)
     end
 end
 

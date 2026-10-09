@@ -31,12 +31,12 @@ using SMTLib
     @testset "Invariant: SMTContext assert! count matches calls" begin
         for _ in 1:30
             ctx = SMTContext()
-            declare_const(ctx, :x, :Int)
+            declare(ctx, :x, Int)
             n = rand(1:10)
             for i in 1:n
                 assert!(ctx, :(x > 0))
             end
-            script = to_smtlib_script(ctx)
+            script = SMTLib.build_script(ctx, false)
             # Count occurrences of "assert" in the script
             count = length(collect(eachmatch(r"\(assert", script)))
             @test count == n

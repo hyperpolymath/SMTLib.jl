@@ -25,31 +25,34 @@ using SMTLib
         ctx = SMTContext()
         @test ctx isa SMTContext
 
-        declare_const(ctx, :x, :Int)
-        declare_const(ctx, :y, :Int)
+        declare(ctx, :x, Int)
+        declare(ctx, :y, Int)
         assert!(ctx, :(x > 0))
         assert!(ctx, :(y < 10))
         assert!(ctx, :(x + y == 5))
 
         # Script should contain all three assertions
-        script = to_smtlib_script(ctx)
+        script = SMTLib.build_script(ctx, false)
         @test script isa String
         @test occursin("declare-const", script)
         @test occursin("assert", script)
+        @test length(collect(eachmatch(r"\(assert", script))) == 3
     end
 
-    @testset "to_smtlib_script includes check-sat and get-model" begin
+    @testset "build_script includes check-sat and get-model" begin
         ctx = SMTContext()
-        declare_const(ctx, :a, :Int)
+        declare(ctx, :a, Int)
         assert!(ctx, :(a > 100))
-        script = to_smtlib_script(ctx; check_sat=true, get_model=true)
+        script = SMTLib.build_script(ctx, true)
         @test occursin("check-sat", script)
         @test occursin("get-model", script)
     end
 
     @testset "Error handling: unknown sort raises an error" begin
+        # A Julia type with no SMT-LIB sort mapping has no `smt_type` method
         ctx = SMTContext()
-        @test_throws Exception declare_const(ctx, :z, :UnknownSort123)
+        @test_throws MethodError declare(ctx, :z, Vector{Int})
+        @test isempty(ctx.declarations)
     end
 
 end
