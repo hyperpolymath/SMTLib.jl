@@ -969,10 +969,27 @@ function set_option!(ctx::SMTContext, key::String, value::String)
     nothing
 end
 
+"""
+    set_option!(ctx::SMTContext, key::Symbol, value)
+
+Set a solver option from a Julia `Symbol` key and any value.
+
+SMT-LIB2 option names are hyphenated (`:produce-unsat-cores`), but a Julia
+symbol literal cannot contain `-`, so underscores in `key` are translated to
+hyphens: `set_option!(ctx, :produce_unsat_cores, true)` emits
+`(set-option :produce-unsat-cores true)`. The value is stringified. Use the
+`String`-key method to pass an option name verbatim.
+"""
 function set_option!(ctx::SMTContext, key::Symbol, value::Any)
-    set_option!(ctx, string(key), string(value))
+    set_option!(ctx, replace(string(key), '_' => '-'), string(value))
 end
 
+"""
+    set_option!(ctx::SMTContext, key::String, value)
+
+Set a solver option with a verbatim option name and any value, which is
+stringified (e.g. `set_option!(ctx, "random-seed", 42)`).
+"""
 function set_option!(ctx::SMTContext, key::String, value::Any)
     set_option!(ctx, key, string(value))
 end
@@ -982,7 +999,7 @@ end
 # ============================================================================
 
 """
-    check_sat(ctx::SMTContext; get_model=true, get_unsat_core=false) -> SMTResult
+    check_sat(ctx::SMTContext; get_model=true, get_unsat_core=<produce-unsat-cores option>) -> SMTResult
 
 Check satisfiability of the current context assertions.
 
@@ -993,7 +1010,9 @@ parses the model. If `get_unsat_core` is true, requests the unsat core.
 # Arguments
 - `ctx::SMTContext`: The solving context.
 - `get_model::Bool`: Request model on sat (default `true`).
-- `get_unsat_core::Bool`: Request unsat core on unsat (default `false`).
+- `get_unsat_core::Bool`: Request unsat core on unsat. Defaults to `true` when
+  the context already has `produce-unsat-cores` set to `true` (for example via
+  `set_option!(ctx, :produce_unsat_cores, true)`), otherwise `false`.
 
 # Returns
 An `SMTResult` with status, model, unsat core, statistics, and raw output.
@@ -1004,7 +1023,8 @@ result = check_sat(ctx)
 result = check_sat(ctx; get_model=true, get_unsat_core=true)
 ```
 """
-function check_sat(ctx::SMTContext; get_model::Bool=true, get_unsat_core::Bool=false)
+function check_sat(ctx::SMTContext; get_model::Bool=true,
+                   get_unsat_core::Bool=get(ctx.solver_options, "produce-unsat-cores", "false") == "true")
     # If unsat core requested, ensure the option is set
     if get_unsat_core
         ctx.solver_options["produce-unsat-cores"] = "true"
@@ -1234,23 +1254,45 @@ function parse_result(output::String)
     SMTResult(status, model, unsat_core, stats, output)
 end
 
+# A keyword list `(:key value :key value ...)` as printed by `get-info`: it may
+# span several lines and hold quoted strings (which may contain parentheses),
+# but no nested parenthesised values. The first alternative consumes a quoted
+# string on its own, so text inside a string (e.g. an error message) is never
+# read as a list.
+const STATISTICS_LIST_REGEX = r"\"(?:[^\"]|\"\")*\"|\(:(?:[^()\"]|\"(?:[^\"]|\"\")*\")*\)"
+
+# One `:key value` pair inside such a list. The key must start a token (it
+# follows `(` or whitespace); the value is a quoted string or a single atom,
+# optionally itself a keyword (`:key :value`). The first alternative consumes a
+# quoted string that is not a value, so `:key value` text inside it is never
+# read as a pair; such a match has no captures.
+const STATISTICS_PAIR_REGEX = r"\"(?:[^\"]|\"\")*\"|(?<![^\s(]):([^\s()\":]+)\s+(\"(?:[^\"]|\"\")*\"|:?[^\s()\"]+)"
+
 """
     parse_statistics(output::String) -> Dict{String, Any}
 
 Parse SMT-LIB2 statistics output (e.g. from `(get-info :all-statistics)`).
+
+Every keyword list in `output`, such as Z3's multi-line
+`(:time 0.01 :memory 12.5 :conflicts 0)`, contributes one entry per
+`:key value` pair. Values are converted with `parse_smt_value`, so numbers
+become `Int` or `Float64`; a keyword value (`:key :value`) is stored without
+its leading colon. Lists whose values are nested S-expressions are skipped.
 """
 function parse_statistics(output::String)
     stats = Dict{String, Any}()
-    # Support both (:key value) and (:key :value)
-    # Match (:key followed by value until next ) or end of line
-    for m in eachmatch(r"\(:([a-zA-Z0-9\._-]+)\s+((?:\d+\.\d+)|\d+|:?[a-zA-Z0-9\._-]+)\)", output)
-        key = m.captures[1]
-        val_str = m.captures[2]
-        # Strip leading : from value if present
-        if startswith(val_str, ":")
-            val_str = val_str[2:end]
+    for list in eachmatch(STATISTICS_LIST_REGEX, output)
+        startswith(list.match, '"') && continue  # a string literal, not a list
+        for m in eachmatch(STATISTICS_PAIR_REGEX, list.match)
+            key = m.captures[1]
+            key === nothing && continue  # a stray string literal, not a pair
+            val_str = m.captures[2]
+            # Strip leading : from a keyword value
+            if startswith(val_str, ":")
+                val_str = val_str[2:end]
+            end
+            stats[key] = parse_smt_value(val_str)
         end
-        stats[key] = parse_smt_value(val_str)
     end
     stats
 end
@@ -2292,6 +2334,12 @@ end
 
 Evaluate a Julia expression against a model dictionary.
 Replaces variables in `expr` with their values from `model` and evaluates.
+
+Function calls on known operators are computed once their arguments are
+values. The short-circuit forms `a && b` and `a || b`, which Julia parses as
+`Expr(:&&)` / `Expr(:||)` rather than calls, are computed once every operand
+is a `Bool`. Anything that cannot be computed is returned as a substituted
+`Expr`.
 """
 function evaluate(model::Dict{Symbol, Any}, expr)
     if expr isa Symbol
@@ -2299,6 +2347,10 @@ function evaluate(model::Dict{Symbol, Any}, expr)
     elseif expr isa Expr
         # Recursively evaluate args
         new_args = [evaluate(model, a) for a in expr.args]
+        # `&&` and `||` are syntax (their own Expr heads), not calls
+        if expr.head in (:&&, :||) && all(a -> a isa Bool, new_args)
+            return expr.head == :&& ? all(new_args) : any(new_args)
+        end
         # Attempt to evaluate the expression if all arguments are literals
         if expr.head == :call
             func = new_args[1]

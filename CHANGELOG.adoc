@@ -17,6 +17,15 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 - Roadmap rewritten to a concrete Must/Intend/Like delivery model.
 - `.machine_readable/STATE.scm` aligned with package version and current roadmap intent.
 
+=== Fixed
+- `parse_statistics` reads every `:key value` pair of a multi-pair keyword list, including Z3's multi-line `(get-info :all-statistics)` block; it previously matched only single-pair `(:key value)` lists (#47).
+- `evaluate` computes `a && b` and `a || b`, which Julia parses as `Expr(:&&)` / `Expr(:||)` rather than calls (#47).
+- `set_option!` with a `Symbol` key translates `_` to `-`, so `:produce_unsat_cores` emits the SMT-LIB option `:produce-unsat-cores` (#47).
+- `check_sat` requests the unsat core by default when the context has `produce-unsat-cores` set (#47).
+- The e2e and property tests and the benchmarks called `declare_const` and `to_smtlib_script`, which never existed; they now use `declare` and `build_script` (#47).
+- The tests that only build SMT-LIB text give `SMTContext` a solver record that is never run, so they pass where no SMT solver is installed, as on CI (#47).
+- CI adds `hyperpolymath/julia-professional-registry`, where AcceleratorGate is registered, so the `test` jobs can resolve the package (#47).
+
 == [0.1.0] - 2026-01-25
 
 === Added
