@@ -7,6 +7,11 @@ using SMTLib
 
 @testset "E2E Pipeline Tests" begin
 
+    # These tests only build SMT-LIB text, which never runs the solver, so they
+    # use a solver record that is never executed. `SMTContext()` would look for
+    # z3 or cvc5 on PATH and fail on a machine that has neither, such as CI.
+    script_only = SMTSolver(:z3, "/nonexistent/z3", "never run")
+
     @testset "Full SMT-LIB generation pipeline" begin
         # Nested arithmetic and logical expression round-trip through to_smtlib
         exprs = [
@@ -22,7 +27,7 @@ using SMTLib
 
     @testset "SMTContext declare → assert → check_sat pipeline (no solver)" begin
         # These operations must not error even without a solver installed
-        ctx = SMTContext()
+        ctx = SMTContext(solver=script_only)
         @test ctx isa SMTContext
 
         declare(ctx, :x, Int)
@@ -40,7 +45,7 @@ using SMTLib
     end
 
     @testset "build_script includes check-sat and get-model" begin
-        ctx = SMTContext()
+        ctx = SMTContext(solver=script_only)
         declare(ctx, :a, Int)
         assert!(ctx, :(a > 100))
         script = SMTLib.build_script(ctx, true)
@@ -50,7 +55,7 @@ using SMTLib
 
     @testset "Error handling: unknown sort raises an error" begin
         # A Julia type with no SMT-LIB sort mapping has no `smt_type` method
-        ctx = SMTContext()
+        ctx = SMTContext(solver=script_only)
         @test_throws MethodError declare(ctx, :z, Vector{Int})
         @test isempty(ctx.declarations)
     end
