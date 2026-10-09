@@ -2,7 +2,7 @@
 name = "SMTLib"
 uuid = "01a11d29-d89a-86da-8e3a-553d114a3537"
 authors = ["Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>"]
-version = "0.2.1"
+version = "0.2.2"
 license = "MPL-2.0"
 
 [deps]
