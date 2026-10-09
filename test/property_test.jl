@@ -7,6 +7,11 @@ using SMTLib
 
 @testset "Property-Based Tests" begin
 
+    # The SMTContext invariant below only builds SMT-LIB text, which never runs
+    # the solver, so it uses a solver record that is never executed.
+    # `SMTContext()` would fail on a machine with no z3 or cvc5, such as CI.
+    script_only = SMTSolver(:z3, "/nonexistent/z3", "never run")
+
     @testset "Invariant: to_smtlib of integer literals is the decimal string" begin
         for _ in 1:50
             n = rand(0:999)
@@ -30,13 +35,13 @@ using SMTLib
 
     @testset "Invariant: SMTContext assert! count matches calls" begin
         for _ in 1:30
-            ctx = SMTContext()
-            declare_const(ctx, :x, :Int)
+            ctx = SMTContext(solver=script_only)
+            declare(ctx, :x, Int)
             n = rand(1:10)
             for i in 1:n
                 assert!(ctx, :(x > 0))
             end
-            script = to_smtlib_script(ctx)
+            script = SMTLib.build_script(ctx, false)
             # Count occurrences of "assert" in the script
             count = length(collect(eachmatch(r"\(assert", script)))
             @test count == n
