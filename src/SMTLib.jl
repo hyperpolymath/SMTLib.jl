@@ -2234,13 +2234,12 @@ function bv(value::Integer, width::Integer)
     BitVecLiteral(value, width)
 end
 
+smt_type(::Type{FPSort{E, S}}) where {E, S} = "(_ FloatingPoint $E $S)"
 """
     fp_sort(ebits::Int, sbits::Int) -> Type
 
 Construct a floating-point sort type `(_ FloatingPoint e s)`.
 """
-struct FPSort{E, S} end
-smt_type(::Type{FPSort{E, S}}) where {E, S} = "(_ FloatingPoint $E $S)"
 function fp_sort(e::Integer, s::Integer)
     if e <= 0 || s <= 0
         error("Floating point bits must be positive")
@@ -2258,13 +2257,6 @@ function array_sort(k, v)
     SMTArray{k, v}
 end
 
-"""
-    re_sort(base_type=String) -> Type
-
-Construct a regular expression sort type `(RegLan)`.
-Note: SMT-LIB strings usually use `RegLan` for the sort of regexes.
-"""
-struct RegLan end
 smt_type(::Type{RegLan}) = "RegLan"
 """
     re_sort(base_type=String) -> Type
