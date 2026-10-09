@@ -8,14 +8,7 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 
 == [Unreleased]
 
-=== Added
-- `SMTLIB-AXIOM-PARITY-CHECKLIST.adoc` baseline plan for Axiom-level release/readiness parity.
-- Basic release-readiness documentation and local readiness script scaffold.
-- CODEOWNERS and workflow linting baseline for governance/security hardening.
-
-=== Changed
-- Roadmap rewritten to a concrete Must/Intend/Like delivery model.
-- `.machine_readable/STATE.scm` aligned with package version and current roadmap intent.
+== [0.2.2] - 2026-10-09
 
 === Fixed
 - `parse_statistics` reads every `:key value` pair of a multi-pair keyword list, including Z3's multi-line `(get-info :all-statistics)` block; it previously matched only single-pair `(:key value)` lists (#47).
@@ -25,6 +18,25 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 - The e2e and property tests and the benchmarks called `declare_const` and `to_smtlib_script`, which never existed; they now use `declare` and `build_script` (#47).
 - The tests that only build SMT-LIB text give `SMTContext` a solver record that is never run, so they pass where no SMT solver is installed, as on CI (#47).
 - CI adds `hyperpolymath/julia-professional-registry`, where AcceleratorGate is registered, so the `test` jobs can resolve the package (#47).
+- Pushing a `vX.Y.Z` tag publishes a GitHub Release with the package tarballs, `sbom.json` (CycloneDX) and `checksums.txt`, and attests their build provenance. No earlier tag produced a Release (#50).
+
+== [0.2.1] - 2026-10-09
+
+0.2.0 was registered in julia-professional-registry under the old placeholder UUID, and was never tagged. Its changes are listed here, under the first tagged release that contains them.
+
+=== Added
+- `SMTLIB-AXIOM-PARITY-CHECKLIST.adoc` baseline plan for Axiom-level release/readiness parity.
+- Basic release-readiness documentation and local readiness script scaffold.
+- CODEOWNERS and workflow linting baseline for governance/security hardening.
+
+=== Changed
+- **Breaking:** the package UUID is now `01a11d29-d89a-86da-8e3a-553d114a3537` (UUIDv8), replacing the placeholder `7d3f9a2c-8b4e-5c1f-a6d0-9e8f7b2c3d4e`. An environment that recorded the old UUID must `Pkg.rm("SMTLib")` and add the package again (#46).
+- Roadmap rewritten to a concrete Must/Intend/Like delivery model.
+- `.machine_readable/STATE.scm` aligned with package version and current roadmap intent.
+
+=== Fixed
+- The package loads. A parenthesised row swap in `src/coprocessors/math.jl` parsed as a named tuple, and `FPSort` and `RegLan` were each declared twice, which precompilation rejects (#48).
+- CI pins `julia-actions/julia-runtest` to v1.10.0. The old pin matched no upstream commit, so every `test` job stopped at setup (#48).
 
 == [0.1.0] - 2026-01-25
 
