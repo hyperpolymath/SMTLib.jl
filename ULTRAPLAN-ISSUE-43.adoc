@@ -6,13 +6,13 @@
 
 == 0. Scope and authority
 
-*Primary issue:* ] —
+*Primary issue:* https://github.com/hyperpolymath/SMTLib.jl/issues/43[#43] —
 _Triage: 9 red checks surfaced by the citation PR #41_ (open, `research`).
 Its standing rule: a red check is *an issue with acceptance criteria, never a
 merge blocker*, and each check must end up *fixed*, *retired*, or *accepted
 with a documented exemption* — "it may not stay undetermined".
 
-*Secondary issue:* ] — the 12 test
+*Secondary issue:* https://github.com/hyperpolymath/SMTLib.jl/issues/47[#47] — the 12 test
 failures (closed 2026-10-09 via PR #49). Included here only to *verify* its
 acceptance criteria actually hold after the fix landed.
 
@@ -98,26 +98,26 @@ pre-existing, not caused by the citation PR.
 |===
 | PR | Merge commit | What it fixed
 
-| ]
+| https://github.com/hyperpolymath/SMTLib.jl/pull/45[PR #45]
 | `93305d82`
 | Matrix arch dimension dropped — setup-julia picks the runner arch (macOS
   legs). *This renamed the checks* (see §1.3).
 
-| ]
+| https://github.com/hyperpolymath/SMTLib.jl/pull/48[PR #48]
 | `487c7ab4`
 | (a) `math.jl:42` parse error (module loaded at all), (b) duplicate
   `FPSort`/`RegLan` structs (precompile rejected), (c) *the pin*: `julia-runtest`
   re-pinned to `d0c4f093badade621cd041bba567d1e832480ac2` (tag `v1.10.0`,
   resolved via `git ls-remote`).
 
-| ]
+| https://github.com/hyperpolymath/SMTLib.jl/pull/49[PR #49]
 | `14da03a7`
 | The 12 test failures tracked by #47, fixed at root cause in `src/` or by
   correcting tests that called APIs that never existed (`declare_const` /
   `to_smtlib_script` → `declare` / `SMTLib.build_script`). No test skipped,
   deleted or loosened. #47 closed.
 
-| ] / ]
+| https://github.com/hyperpolymath/SMTLib.jl/pull/50[PR #50] / https://github.com/hyperpolymath/SMTLib.jl/pull/51[PR #51]
 | `126ced1` (current `main` HEAD)
 | Release workflow fix; version bump to 0.2.2.
 |===
@@ -374,6 +374,13 @@ annotated-tag peels — and merged before this branch, so the lock below matches
 the merged tree). Remaining open: #56 (mirror) and #57 (Pages) await the
 owner's fix/retire ruling; umbrella #53 closes when they are determined (its
 AC2–AC4).
+
+Post-change verification (this PR's own CI, run `38044880793` on `fb1d6d1`):
+the `Install Z3 (ubuntu)` step is green with its `z3 --version` execution
+sentinel on all three ubuntu legs (1.10, 1.11, nightly), `Run tests` is green
+on all 9 matrix legs — so the solver-gated tests (including the #47 unsat-core
+path) executed with Z3 on PATH rather than skipping — and every governance,
+CodeQL, Hypatia and secret-scan check is green.
 
 _Note on this document: it is the plan and its execution record. Recon clones
 of `standards` and `rsr-template-repo` were read from GitHub and live outside
