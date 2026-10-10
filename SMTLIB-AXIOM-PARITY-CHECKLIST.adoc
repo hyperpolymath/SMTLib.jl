@@ -58,9 +58,11 @@ Bring `SMTLib.jl` to the same release/readiness posture as `Axiom.jl` for JuliaH
 == INTEND (Strongly recommended for operational parity)
 1. CI expansion toward Axiom breadth
 - Keep current Julia matrix and add:
-- docs build verification (`docs/make.jl`).
+- docs build verification (`casket-pages.yml` site build; the Documenter
+  `docs/make.jl` path was retired in #60 and no supported Documenter build exists).
 - package install smoke from clean temp environment.
-- optional solver-backed integration job(s) with explicit Z3/CVC5 installs.
+- optional solver-backed integration job(s) with explicit Z3/CVC5 installs
+  (Z3 on the ubuntu legs landed with #62; CVC5 still optional).
 - artifact upload for solver capability report and test evidence.
 
 2. Diagnostics and failure ergonomics
