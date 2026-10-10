@@ -19,6 +19,17 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v4
+      # AGENTS.adoc "CI & Solver Detection": install at least one solver and
+      # keep it on PATH so solver-backed tests run instead of skipping. Ubuntu
+      # legs get Z3; other legs keep the documented graceful-skip behaviour
+      # (#62). `z3 --version` is the positive execution sentinel.
+      - name: Install Z3 (ubuntu)
+        if: runner.os == 'Linux'
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y z3
+          z3 --version
       - name: Setup Julia
         uses: julia-actions/setup-julia@fa02766e078afaaf09b14210362cee14137e6a32 # v3.0.2
         with:

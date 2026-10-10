@@ -55,7 +55,7 @@ perfective = 10   # % for SPDX headers, doc updates, formatting, style
 # Customise this per project — the template default is generic.
 
 [methodology.unique-strength]
-description = "{{PROJECT_UNIQUE_STRENGTH}}"
+description = "Pure-Julia SMT-LIB 2 frontend with one API across four solvers (Z3, CVC5, Yices, MathSAT): constraint building, model retrieval and incremental sessions with no FFI and no code generation, requiring an installed solver"
 deepen-not-broaden = true
 
 # ============================================================================
