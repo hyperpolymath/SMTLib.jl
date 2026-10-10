@@ -1,0 +1,380 @@
+// SPDX-License-Identifier: CC-BY-SA-4.0
+// Copyright (c) 2026 Jonathan D.A. Jewell
+= Ultraplan: close #43 (9 red checks from the citation PR), verify #47, and mop up the recon findings
+:toc:
+:toclevels: 3
+
+== 0. Scope and authority
+
+*Primary issue:* ] —
+_Triage: 9 red checks surfaced by the citation PR #41_ (open, `research`).
+Its standing rule: a red check is *an issue with acceptance criteria, never a
+merge blocker*, and each check must end up *fixed*, *retired*, or *accepted
+with a documented exemption* — "it may not stay undetermined".
+
+*Secondary issue:* ] — the 12 test
+failures (closed 2026-10-09 via PR #49). Included here only to *verify* its
+acceptance criteria actually hold after the fix landed.
+
+*Binding estate content this plan follows* (all read during recon):
+
+[cols="2,3,3",options="header"]
+|===
+| Source | What it binds | Key rule used here
+
+| `standards/0-canon/RSR-PHILOSOPHY.adoc`
+| the stopping rule
+| "A new scanner finding surfaced at a boundary remains an issue with
+  acceptance criteria, never a blocker on stopping." Working state = default
+  branch green and the thing runs.
+
+| `standards` ] (and the #43 body)
+| triage determinations
+| For every red: one determination — *fix* / *retire the gate* / *accept with
+  a documented exemption*. "Repair or retire; never mute." No `continue-on-error`,
+  no demotion to warning, no silent required-set drops.
+
+| `standards/docs/CICD-SIGNAL-DISCIPLINE.adoc`
+| check naming, renames, required contexts
+| Rename checks only via the safe sequence; a required context nothing emits is
+  a *phantom*; required contexts are *derived, never typed*
+  (`standards/config/rulesets/gates.json`).
+
+| `standards/3-practice/TOOLING-VERSION-INTEGRITY-POLICY.adoc`
+| soft gates and pin integrity
+| R4: every `continue-on-error` carries a `GATE DEACTIVATED …` or
+  `by-design:`/`advisory:` comment; a green/red bit cannot distinguish
+  "passed" from "never ran" — prove execution. (This is exactly the #43
+  failure class.)
+
+| `standards/docs/EXEMPTION-MECHANISMS.adoc`
+| what an exemption is
+| Exemption ≠ debt; documented excuses live in `.hypatia-baseline.json` /
+  Debtfile per the decision tree; *no per-PR exemptions exist*; never invent
+  suppression conventions.
+
+| `standards/docs/ISSUE-INTAKE-SPEC.adoc`
+| how follow-up findings are filed
+| Scope labels mandatory; dedupe; *a wave of > 5 findings opens exactly one
+  `meta:campaign` umbrella first*; estate-wide items go to the estate register
+  or are filed with a `Propagation` section.
+
+| `standards/docs/DEPENDABOT-POLICY.adoc` (owner ruling D269)
+| updates land unattended
+| Only when the base branch carries a *required build/test check*; never
+  `gh pr merge --auto`; `actions.lock` is repaired in the same PR as any
+  `uses:` change.
+
+| `rsr-template-repo`
+| the scaffold this repo was minted from
+| Ships `.github/workflows/actions.lock`; `REQUIRES_INITIALISATION.adoc` must
+  not be deleted until its tokens are resolved; placeholder vocabulary in
+  `.machine_readable/ai/PLACEHOLDERS.adoc`.
+|===
+
+== 1. Recon — ground truth
+
+=== 1.1 What issue #43 actually is
+
+All 9 red checks on PR #41 are the CI matrix `test (*)` jobs, and all 9 died at
+*setup* on the same line of `.github/workflows/CI.yml`:
+
+----
+julia-actions/julia-runtest@79a7e100883947123f8263c5f06e6c2fee60dd0c
+----
+
+That SHA exists in *no upstream ref* of `julia-actions/julia-runtest`. It
+shares a 30-hex prefix with the real v1.9.3
+(`79a7e100…c0ea3eb972f`) and then diverges — an orphan/corrupted pin. Every
+`test (*)` job therefore *never ran a single test*: this is the
+TOOLING-VERSION-INTEGRITY failure class ("a green/red bit cannot distinguish
+'passed' from 'never ran'"), not 9 independent test failures. Issue #43's own
+text confirms the same 9 were already red on `main` @ `553d49e` (2026-09-20) —
+pre-existing, not caused by the citation PR.
+
+=== 1.2 What has landed since (the fixes are already in the repo)
+
+[cols="1,2,3",options="header"]
+|===
+| PR | Merge commit | What it fixed
+
+| ]
+| `93305d82`
+| Matrix arch dimension dropped — setup-julia picks the runner arch (macOS
+  legs). *This renamed the checks* (see §1.3).
+
+| ]
+| `487c7ab4`
+| (a) `math.jl:42` parse error (module loaded at all), (b) duplicate
+  `FPSort`/`RegLan` structs (precompile rejected), (c) *the pin*: `julia-runtest`
+  re-pinned to `d0c4f093badade621cd041bba567d1e832480ac2` (tag `v1.10.0`,
+  resolved via `git ls-remote`).
+
+| ]
+| `14da03a7`
+| The 12 test failures tracked by #47, fixed at root cause in `src/` or by
+  correcting tests that called APIs that never existed (`declare_const` /
+  `to_smtlib_script` → `declare` / `SMTLib.build_script`). No test skipped,
+  deleted or loosened. #47 closed.
+
+| ] / ]
+| `126ced1` (current `main` HEAD)
+| Release workflow fix; version bump to 0.2.2.
+|===
+
+*Green evidence on `main` @ `126ced1`* — CI run `37921988068` (2026-10-09):
+all 9 matrix legs `success` —
+
+----
+test (1.10, ubuntu-latest)   test (1.11, ubuntu-latest)   test (nightly, ubuntu-latest)
+test (1.10, macos-latest)    test (1.11, macos-latest)    test (nightly, macos-latest)
+test (1.10, windows-latest)  test (1.11, windows-latest)  test (nightly, windows-latest)
+----
+
+No `continue-on-error`, no warning demotion anywhere in `CI.yml` (verified; the
+only soft gate in the repo is `boj-build.yml`'s, see §1.5).
+
+=== 1.3 The naming drift — and why it is harmless here
+
+The issue names its checks `test (1.10, ubuntu-latest, x64)` etc. Since PR #45
+the arch dimension is gone and the emitted contexts are `test (1.10,
+ubuntu-latest)` etc. Per CICD-SIGNAL-DISCIPLINE, a renamed context orphans any
+rule requiring the old name. *Checked and clear:* the repo's active rulesets
+require exactly one context — `scan / gitleaks` (ruleset "Secret-Scan-Floor").
+Nothing requires the old `x64` names, so the rename created *no phantom
+requirements*. This must be stated in the closure record (it is the one
+non-obvious fact a future reader needs).
+
+=== 1.4 Current check board on `main` @ `126ced1`
+
+*Green* — CI (9/9), Governance (10 jobs incl. Guix/Nix, workflow security,
+trusted-base, licence, well-known), CodeQL, Hypatia, Secret Scanner
+(gitleaks/rust/shell), OSSF Scorecard, Release side (`Build Package` ×3,
+SBOM, Create Release, Dependabot, sync).
+
+*Red (chronic, push-only — not PR-visible, but red on `main`)*:
+
+* `Mirror to Git Forges` — all 7 mirror jobs fail at `webfactory/ssh-agent`:
+  the `*_MIRROR_ENABLED` vars are `true` but the SSH secrets are absent. Failing
+  on every run back to at least 2026-09-20 (`553d49e`).
+* `GitHub Pages` (`casket-pages.yml`) — `build` *cancelled* on every recent run
+  (cabal build of `casket-ssg` blows through the 15-minute job window), `deploy`
+  skipped. Effectively chronically broken.
+
+Per the same standing rule these two reds need determinations of their own —
+they must *not* be folded into #43 (different defects; ISSUE-INTAKE-SPEC Rule 2).
+
+=== 1.5 Adjacent debt found during recon (not #43 scope)
+
+* `actions.lock` is *absent* (estate canon R2: "present everywhere"; the
+  template ships one at `.github/workflows/actions.lock`). PR #48's body
+  already records the absence.
+* `boj-build.yml:18` — bare `continue-on-error: true` with no R4 comment
+  (it is a by-design best-effort trigger, but it must *say* so), and the curl
+  payload quoting is malformed (`casket\\\"}\"}`).
+* `docs/make.jl` still lists `index.md`/`api.md`/`examples.md`/`solvers.md`
+  while `docs/src/` is `.adoc` (md→adoc migration residue). `casket-pages.yml`
+  is the live site path.
+* `REQUIRES_INITIALISATION.adoc` — one unresolved token
+  `{{PROJECT_UNIQUE_STRENGTH}}` in
+  `.machine_readable/bot_directives/methodology.a2ml:58`.
+* CI installs *no SMT solver*, against AGENTS.adoc's own guidance ("CI should
+  install at least one solver"). Consequence: the Z3-gated tests — including
+  #47's unsat-core fix — skip on every CI leg.
+* Tier/conformance drift (cross-cutting): only `scan / gitleaks` is required,
+  while the canon's GATE set for a Julia repo is governance + secret-scanner +
+  hypatia + codeql + `julia-ci.yml` (this repo's file is `CI.yml`; no tier
+  prefixes). Required contexts are *derived by the estate applier, never typed*
+  — this is `scope:estate` work, related to `standards` #994.
+* Trivial: `TEST-NEEDS.adoc` claims "E2E tests 0" though `test/e2e_test.jl`
+  exists.
+
+== 2. Phase 1 — close #43 with recorded determinations (the core)
+
+*Determinations — all 9 checks: FIXED.* (The named contexts are
+fixed-and-renamed: successor = same matrix leg without the `, x64` suffix.)
+Each of the 18 checkboxes resolves as follows:
+
+[cols="1,3,3",options="header"]
+|===
+| # | Check named in #43 | Determination and evidence
+
+| 1–3
+| `test (1.10, {ubuntu,macos,windows}-latest, x64)`
+| *Fixed*. Pin repinned (PR #48 → `487c7ab4`); suite passes (PR #49 →
+  `14da03a7`); successor context `test (1.10, <os>)` green on `main` in CI run
+  `37921988068` (@ `126ced1`). Fix is in the repo; no soft gate, no demotion.
+
+| 4–6
+| `test (1.11, {ubuntu,macos,windows}-latest, x64)`
+| *Fixed* — same evidence, successor `test (1.11, <os>)`.
+
+| 7–9
+| `test (nightly, {ubuntu,macos,windows}-latest, x64)`
+| *Fixed* — same evidence, successor `test (nightly, <os>)`.
+|===
+
+Second checkbox of each pair ("green on `main`, fix in the repo — not
+`continue-on-error`, not a demotion") is satisfied by §1.2/§1.4 and should be
+ticked with the same evidence link.
+
+*Closure procedure (in order):*
+
+. Post one triage comment on #43 containing: the table above; the pin autopsy
+  (orphan SHA, 30-hex prefix collision with v1.9.3); the rename map
+  `test (…, x64)` → `test (…)` plus the no-phantom check ("only `scan /
+  gitleaks` is required; nothing required the old names"); links to PRs #48,
+  #49 and CI run `37921988068`.
+. Tick all 18 body checkboxes (the "may not stay undetermined" rule).
+. Labels before closing (ISSUE-INTAKE-SPEC Rule 5): add `scope:repo` and
+  `cicd`; keep `research`. Cross-reference `hyperpolymath/standards` #994 as
+  the cross-cutting home of the pin-orphan class (the repo-level instance is
+  what is being fixed here).
+. Close #43 with that comment as the closing record.
+
+*Forbidden closure paths* (explicitly ruled out by the issue's own ACs and
+standards#994 AC5): `continue-on-error`, demotion to warning, retiring the test
+matrix, or an "exemption" — none apply, because the checks are genuinely green
+again.
+
+== 3. Phase 2 — verify #47 is really done (no code)
+
+Check each #47 acceptance criterion against the merged state, then tick the
+boxes in its body for hygiene and leave it closed:
+
+* `get_statistics` parses `(:key value …)` — fixed in PR #49 item 1. ✔
+* `evaluate` handles `Expr(:&&)`/`Expr(:||)` — fixed in PR #49 item 2. ✔
+* `get_unsat_core` returns named labels (Z3 4.13.3 returns `[:pos, :neg]`) —
+  fixed in PR #49 item 3. ✔ *(caveat: CI never exercises it — no solver on
+  PATH; closed by Phase 3 item 7.)*
+* `declare_const` decision — resolved: tests call `declare`/`build_script`;
+  no second API surface added. ✔
+* `Pkg.test()` green on the CI matrix — CI run `37921988068`. ✔
+
+== 4. Phase 3 — follow-up wave (new work; umbrella first)
+
+Seven findings > five ⇒ ISSUE-INTAKE-SPEC Rule 3: open *one* `meta:campaign`
+umbrella first ("CI hygiene & estate-conformance top-up — 2026-10-10"), then
+one issue per item, each referencing the umbrella:
+
+. *`[cicd]` Mirror workflow red on `main` since ≤ 2026-09-20* — vars enabled
+  without SSH secrets; every job fails in `webfactory/ssh-agent`. Determination
+  owed: *fix* (provision the secrets) or *retire* (clear the `*_MIRROR_ENABLED`
+  vars / remove the workflow). Record the date it went red. (`📅 PERIODIC`/push
+  tier — never a PR check; fine as push-only per the canon.)
+. *`[cicd]` GitHub Pages chronically cancelled* — diagnose the cabal build
+  window (cache key / timeout / prebuilt `casket-ssg`), or retire the workflow.
+  Same determination discipline.
+. *`[cicd, conformance]` Adopt `actions.lock`* (canon R2; template ships one)
+  and the lock-sync discipline: regenerated in the same PR as any `uses:`
+  change. Fold the regeneration into PR #52 (below) or land it alongside.
+. *`[cicd]` R4-compliance for `boj-build.yml`* — add the `by-design:` /
+  `advisory:` rationale comment above the `continue-on-error`, and fix the
+  malformed trigger payload quoting.
+. *`[docs]` Resolve `docs/make.jl` staleness* — either retire the Documenter
+  path (casket-pages is the live site builder) or point it at the `.adoc`
+  sources. Decide which is canonical; do not leave two half-truths.
+. *`[conformance]` Fill `{{PROJECT_UNIQUE_STRENGTH}}`* in
+  `.machine_readable/bot_directives/methodology.a2ml` (draft from the package
+  purpose; owner confirms), then let the estate top-up pass retire
+  `REQUIRES_INITIALISATION.adoc` — do *not* delete that file by hand.
+. *`[testing, cicd]` Install Z3 on the ubuntu CI legs* (AGENTS.adoc compliance)
+  so solver-backed tests — including the #47 unsat-core path — actually run;
+  keep the graceful-skip behaviour documented for legs without a solver.
+. *(Optional, `scope:estate` + Propagation section)* GATE-tier conformance:
+  canonical `julia-ci.yml` naming, `🔴 GATE:`-prefixed job names, and the
+  derived required-context rollout. Hand-typing required contexts is forbidden;
+  this coordinates with the estate applier and `standards` #994.
+
+Fold the trivial `TEST-NEEDS.adoc` refresh into whichever PR fits.
+
+== 5. Phase 4 — handle open PR #52 (dependabot, 6 action bumps)
+
+* Per D269 the repo may *not* auto-arm: the only required context is
+  `scan / gitleaks`, not a build/test check. Merge manually after checks are
+  green — never `gh pr merge --auto`.
+* Before merging, verify every new pin resolves upstream with `git ls-remote`
+  (julia-runtest `v1.12.0`, codeql-action `v4.38.2`, …). This is literally the
+  #43 failure class; a dependabot pin that cannot resolve reproduces it.
+  `julia-runtest 1.10 → 1.12` and `codeql-action 3.x → 4.x` deserve a look at
+  release notes for behaviour changes, not just SHA validity.
+* If Phase 3.3 (`actions.lock`) lands first, regenerate the lock inside #52 —
+  "regenerated in the same PR as any `uses:` change".
+
+== 6. Sequencing, stopping points, definition of done
+
+Sequencing (each step leaves `main` green — "stop at a working state"):
+
+----
+Phase 1  close #43 with determinations            (comment + labels + close)
+Phase 2  tick #47 boxes                           (hygiene)
+Phase 3  umbrella issue → 7 follow-up issues      (intake Rule 3)
+Phase 3' one PR per fixable item, smallest first:
+         4 (boj R4 comment, tiny) → 7 (solver in CI) → 5 (docs/make.jl)
+         → 3 (actions.lock + #52 regen) → 1/2 (mirror & pages determinations)
+         → 6 (PROJECT_UNIQUE_STRENGTH, owner-confirmed)
+Phase 4  verify & merge PR #52
+----
+
+*Definition of done for this plan:*
+
+* #43 closed with 18/18 determinations recorded and evidenced; no mute used.
+* #47 verified, boxes ticked.
+* Every red on `main` (mirror, Pages) has a determination: fixed, retired, or
+  accepted with a documented exemption (Debtfile/baseline per
+  EXEMPTION-MECHANISMS — never invented conventions).
+* No bare soft gates; no undetermined red; `actions.lock` present or its
+  absence tracked by an open issue; #52 merged with verified pins.
+
+== 7. Evidence appendix
+
+* `gh issue view 43 --json body` — the 9 checks and 18 checkboxes.
+* `gh pr view 48/49/45 --json mergeCommit` — `487c7ab4`, `14da03a7`, `93305d82`.
+* `gh run view 37921988068` — 9/9 `test (*)` legs success on `main` @ `126ced1`.
+* `gh api repos/hyperpolymath/SMTLib.jl/rules/branches/main` — required
+  contexts = `scan / gitleaks` only (no phantoms from the rename).
+* `gh run list --workflow mirror.yml` — failures back to at least 2026-09-20.
+* `grep -rn continue-on-error .github/workflows/` — only `boj-build.yml:18`.
+* Pin autopsy: `julia-actions/julia-runtest@79a7e100…c2fee60dd0c` shares a
+  30-hex prefix with real v1.9.3 `79a7e100…c0ea3eb972f`; resolved pin
+  `d0c4f093…` = `v1.10.0` (PR #48 records the `git ls-remote` proof).
+
+'''
+
+== 8. Execution record (2026-10-10)
+
+Executed in this session, with these deviations from the plan above (all forced
+by the GitHub integration's permission shape, all recorded):
+
+* *The Arena integration carries `issues: read`* (verified from the app's own
+  permission set). Issue *creation* works; commenting, editing bodies, ticking
+  checkboxes, adding labels and closing do not. Consequences:
+  ** the #43 determinations live in the closing PR's body (this document is
+     the long form); the 18 checkboxes in #43's body could not be ticked and
+     the triage comment could not be posted on the issue itself;
+  ** issue closure is via the PR's `Closes #…` references (platform
+     auto-close), not `gh issue close`;
+  ** labels come from the `label-triage.yml` classifier on `opened` (titles
+     were written to drive it: `ci:`, `fix:`, `docs:`, `test:` prefixes and
+     "owner decision needed"); a few classifier inexactitudes remain
+     (`meta:campaign` intended on the umbrella, classifier applied
+     `meta:umbrella`; `scope:repo` never applied by the classifier).
+* Issue *#54* (`zz-probe-labels`) was a permission probe and *#55* an
+  empty-bodied mis-create (`body_file` is not an API field); both are retired
+  via the same PR's `Closes` list. #56 replaces #55.
+* Estate-side cross-cutting notes (GATE-tier / required-context derivation,
+  the pin-orphan class) could not be commented onto `standards` #994 (same
+  permission shape on that repository); §4 item 8 and §1.3 are the record for
+  the owner to relay.
+
+Phases completed: Phase 1 (determinations recorded; #43 closed by the PR),
+Phase 2 (verified), Phase 3 (umbrella #53 + findings #55–#62 filed; #58–#62
+fixed in this PR), Phase 4 (PR #52 pin-verified — all 6 SHAs resolve, incl.
+annotated-tag peels — and merged before this branch, so the lock below matches
+the merged tree). Remaining open: #56 (mirror) and #57 (Pages) await the
+owner's fix/retire ruling; umbrella #53 closes when they are determined (its
+AC2–AC4).
+
+_Note on this document: it is the plan and its execution record. Recon clones
+of `standards` and `rsr-template-repo` were read from GitHub and live outside
+this repository._
