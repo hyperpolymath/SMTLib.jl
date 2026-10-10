@@ -28,7 +28,7 @@ acceptance criteria actually hold after the fix landed.
   acceptance criteria, never a blocker on stopping." Working state = default
   branch green and the thing runs.
 
-| `standards` ] (and the #43 body)
+| https://github.com/hyperpolymath/standards/issues/994[standards#994] (and the #43 body)
 | triage determinations
 | For every red: one determination — *fix* / *retire the gate* / *accept with
   a documented exemption*. "Repair or retire; never mute." No `continue-on-error`,
