@@ -8,21 +8,21 @@
 |===
 |Category |Count |Details
 |*Source modules* |12 |3,586 lines
-|*Test files* |1 |1,578 lines, 650 @test/@testset
-|*Benchmarks* |0 |None
-|*E2E tests* |0 |None
+|*Test files* |3 |`test/runtests.jl` (650+ @test/@testset), `test/e2e_test.jl`, `test/property_test.jl`
+|*Benchmarks* |1 |`benches/benchmarks.jl` (BenchmarkTools `SUITE`)
+|*E2E tests* |1 |`test/e2e_test.jl` (declare → assert → check_sat; script building)
 |===
 
 === What’s Missing
 
 ==== E2E Tests
 
-* [ ] No test running SMTLib against actual SMT solvers (Z3, CVC5)
+* [x] Solver-backed tests (Z3) exist and run when `z3` is on `PATH` — and since #62 the ubuntu CI legs install Z3, so they execute in CI instead of skipping.
 * [ ] No roundtrip test (generate SMTLib2 -> parse back)
 
 ==== Aspect Tests
 
-* [ ] *Performance*: SMT solving is performance-critical, 0 benchmarks
+* [x] *Performance*: `benches/benchmarks.jl` provides a BenchmarkTools `SUITE` (generation/latency).
 * [ ] *Error handling*: No tests for unsatisfiable formulas, timeout,
 solver crashes
 * [ ] *Concurrency*: No parallel solving tests
