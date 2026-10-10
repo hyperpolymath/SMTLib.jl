@@ -14,7 +14,12 @@ jobs:
       - name: Trigger BoJ Server (Casket/ssg-mcp)
         run: |
           # Send a secure trigger to boj-server to build this repository
-          curl -X POST "http://boj-server.local:7700/cartridges/ssg-mcp/invoke"             -H "Content-Type: application/json"             -d "{\"repo\": \"${{ github.repository }}\", \"branch\": \"${{ github.ref_name }}\", \"engine\": \"casket\\"}"}
+          curl -X POST "http://boj-server.local:7700/cartridges/ssg-mcp/invoke" \
+            -H "Content-Type: application/json" \
+            -d "{\"repo\": \"${{ github.repository }}\", \"branch\": \"${{ github.ref_name }}\", \"engine\": \"casket\"}"
+        # by-design: best-effort trigger to the internal boj-server; the
+        # service may be absent on a runner and that must not fail CI. This is
+        # an advisory step, not a suppressed gate (TOOLING-VERSION-INTEGRITY R4).
         continue-on-error: true
 permissions:
   contents: read
