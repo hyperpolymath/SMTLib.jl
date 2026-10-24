@@ -6,9 +6,6 @@ workflows:
     '.github/workflows/CI.yml':
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
         - 'julia-actions/cache@9353db09a0f2bbbdec6f41791918c75d37391b36'
-        - 'julia-actions/julia-buildpkg@e3eb439fad4f9aba7da2667e7510e4a46ebc46e1'
-        - 'julia-actions/julia-processcoverage@03114f09f119417c3242a9fb6e0b722676aedf38'
-        - 'julia-actions/julia-runtest@6e050c8013b833b1195105ff2fce9cd802f53271'
         - 'julia-actions/setup-julia@da908477b5db94c10ffce8cfea9f2b3b9d5db687'
     '.github/workflows/boj-build.yml':
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
@@ -124,21 +121,6 @@ dependencies:
         commit: 'sha1-9353db09a0f2bbbdec6f41791918c75d37391b36'
         owner_id: 53965732
         repo_id: 441908600
-    'julia-actions/julia-buildpkg@e3eb439fad4f9aba7da2667e7510e4a46ebc46e1':
-        ref: 'e3eb439fad4f9aba7da2667e7510e4a46ebc46e1'
-        commit: 'sha1-e3eb439fad4f9aba7da2667e7510e4a46ebc46e1'
-        owner_id: 53965732
-        repo_id: 210451482
-    'julia-actions/julia-processcoverage@03114f09f119417c3242a9fb6e0b722676aedf38':
-        ref: '03114f09f119417c3242a9fb6e0b722676aedf38'
-        commit: 'sha1-03114f09f119417c3242a9fb6e0b722676aedf38'
-        owner_id: 53965732
-        repo_id: 249500631
-    'julia-actions/julia-runtest@6e050c8013b833b1195105ff2fce9cd802f53271':
-        ref: '6e050c8013b833b1195105ff2fce9cd802f53271'
-        commit: 'sha1-6e050c8013b833b1195105ff2fce9cd802f53271'
-        owner_id: 53965732
-        repo_id: 208538601
     'julia-actions/setup-julia@da908477b5db94c10ffce8cfea9f2b3b9d5db687':
         ref: 'v3.0.3'
         commit: 'sha1-da908477b5db94c10ffce8cfea9f2b3b9d5db687'
