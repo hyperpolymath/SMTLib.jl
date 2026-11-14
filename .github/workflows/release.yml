@@ -46,10 +46,6 @@ jobs:
       # from Project.toml [compat].
       - name: Ignore any committed manifest
         run: rm -f Manifest.toml
-      # AcceleratorGate is registered in the hyperpolymath registry, not in
-      # General.
-      - name: Add registries
-        run: julia -e 'using Pkg; Pkg.Registry.add("General"); Pkg.Registry.add(Pkg.RegistrySpec(url="https://github.com/hyperpolymath/julia-professional-registry"))'
       - name: Build and test
         run: julia --project -e 'using Pkg; Pkg.build(); Pkg.test()'
       - name: Package artifacts
@@ -79,7 +75,6 @@ jobs:
       - name: Generate SBOM
         run: |
           rm -f Manifest.toml
-          julia -e 'using Pkg; Pkg.Registry.add("General"); Pkg.Registry.add(Pkg.RegistrySpec(url="https://github.com/hyperpolymath/julia-professional-registry"))'
           julia --project -e '
             using Pkg
             Pkg.instantiate()

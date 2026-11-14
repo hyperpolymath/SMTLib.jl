@@ -36,7 +36,5 @@ jobs:
           version: ${{ matrix.julia-version }}
       - name: Cache Julia artifacts
         uses: julia-actions/cache@9353db09a0f2bbbdec6f41791918c75d37391b36 # v3.5.0
-      # AcceleratorGate is registered in the hyperpolymath registry, not in
-      # General. The registry is added to the depot that the test step reuses.
       - name: Install, build, test
-        run: julia --project=. -e 'using Pkg; Pkg.Registry.add("General"); Pkg.Registry.add(Pkg.RegistrySpec(url="https://github.com/hyperpolymath/julia-professional-registry.git")); Pkg.instantiate(); Pkg.build(); Pkg.test(coverage=true)'
+        run: julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.build(); Pkg.test(coverage=true)'
